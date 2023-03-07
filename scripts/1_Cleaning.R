@@ -14,8 +14,8 @@
 
   library(pacman) 
   
-  p_load(tidyverse, rstudioapi, rio, plotly, leaflet,
-         rgeos, tmaptools, sf, stargazer, osmdata, scales)
+  p_load(tidyverse, rstudioapi, rio, plotly, leaflet, leaflet, htmlwidgets, SuperLearner, modeldata,
+         rgeos, tmaptools, sf, stargazer, osmdata, scales, dplyr, IRdisplay, spatialsample, geojsonio)
   
    rm(list=ls())
 
@@ -28,7 +28,7 @@
  glimpse(test) 
  glimpse(train) #Las dos BD de Train y Test tienen las mismas variables
  
- train <- train %>% mutate(latp=lat,longp=lon)
+ train <- train %>% mutate(latp=lat,longp=lon, ln_price = log(price))
  train <- st_as_sf(train,coords=c('longp','latp'),crs=4326)
 
 #Limpieza de la BD ----
@@ -89,6 +89,7 @@
                      as.data.frame() %>%
                      mutate(V1 = scales::dollar(V1))
  
+ #Precio
  price_boxplot <- ggplot() +
                   geom_boxplot(aes(y = train$price), fill = "#3FA0FF", alpha=0.5) +
                   labs(y = "Precio de venta") +
@@ -98,15 +99,36 @@
  
  price_boxplot
 
+ #Log Precio
+ price_boxplot_ln <-  ggplot() +
+                   geom_boxplot(aes(y = train$ln_price), fill = "#3FA0FF", alpha=0.5) +
+                   labs(y = "Precio de venta (log)") +
+                   scale_x_discrete() + scale_y_continuous(labels = label_dollar(prefix = "$")) + 
+                   theme_bw() +
+                   theme(axis.title = element_text(size = 10, color = "black", face = "bold"))
+ 
+ price_boxplot_ln
+ 
+ #Precio
  price_histogram <-   ggplot(data = train, mapping = aes(x = price))  + 
-                      geom_histogram(aes(y =after_stat(density)), bins = 15, position = 'identity', color="#424242", fill="#E3E3E3") +
-                      stat_function(fun = dnorm, xlim = c(min(train$price), max(train$price)), colour="#1C86EE", linewidth=1,
-                      args = list(mean = mean(train$price), 
-                      sd = sd(train$price))) + 
+                      geom_histogram(bins = 15, position = 'identity', color="#424242", fill="#BFBFBF") +
                       labs(title = 'Distribución de los precios de venta',
                       x = 'Precio de Venta',
                       y = 'Frecuencia') + 
                       scale_x_continuous(labels = label_number()) +
                       theme_bw()
-
+ 
  price_histogram
+ 
+ #Log Precio
+ price_histogram_ln <-  ggplot(data = train, mapping = aes(x = ln_price))  + 
+                       geom_histogram(bins = 15, position = 'identity', color="#424242", fill="#BFBFBF") +
+                       labs(title = 'Distribución de los precios de venta',
+                       x = 'Precio de Venta',
+                       y = 'Frecuencia') + 
+                       scale_x_continuous(labels = label_number()) +
+                       theme_bw()
+ 
+ price_histogram_ln
+ 
+ 
