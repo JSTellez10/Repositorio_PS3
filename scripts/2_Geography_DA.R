@@ -6,8 +6,11 @@
 #------------------------------------------------------------------------------#
 
 #Leemos los datos geográficos
+#Datos descargados de la página Datos Abiertos de Bogotá - 6 e marzo de 2023
 
-  #Datos descargados de la página Datos Abiertos de Bogotá - 6 e marzo de 2023
+  #Para ejecutar el código es necesario descargar todas las carpetas que se encuentran en el siguiente repositorio:
+  #https://github.com/AndresMPL/Repositorio_PS3/tree/main/datasets/localidades
+  #Guardar estas carpetas en una carpeta llamada "datos" y fijar el directorio de trabajo en esta última carpeta contenedora
 
   localidades <-st_read("datos/localidades")
   parques <-st_read("datos/parques")
