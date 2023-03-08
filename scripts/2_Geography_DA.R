@@ -18,6 +18,8 @@
   cai <-st_read("datos/cai")
   biblioestacion <-st_read("datos/bibloestacion")
   centro_financiero <-st_read("datos/centro_financiero")
+  delitos <-st_read("datos/delitos")
+  cuadrantepolicia <-st_read("datos/cuadrantepolicia")
 
 
   #Datos descargados de Open Street Map
@@ -72,6 +74,14 @@
   centro_financiero <- st_transform(centro_financiero,4686)
   sf_centro_financiero = centro_financiero %>% st_sf
   
+  #Delitos
+  centro_delitos <- st_transform(delitos,4686)
+  sf_centro_delitos = centro_delitos %>% st_sf
+  
+  #Cuadrantes Policia
+  centro_cuadrantepolicia <- st_transform(cuadrantepolicia,4686)
+  sf_centro_cuadrantepolicia = centro_cuadrantepolicia %>% st_sf
+  
 #Generamos los centroides de cada variable
   
   centroides_parques  <- gCentroid(as(sf_parques$geometry, "Spatial"), byid = T)
@@ -82,7 +92,9 @@
   centroides_cai      <- gCentroid(as(sf_cai$geometry, "Spatial"), byid = T)
   centroides_best     <- gCentroid(as(sf_biblioestacion$geometry, "Spatial"), byid = T)
   centroides_centrof  <- gCentroid(as(sf_centro_financiero$geometry, "Spatial"), byid = T)
-
+  centroides_delitos  <- gCentroid(as(sf_centro_delitos$geometry, "Spatial"), byid = T)
+  centroides_cuadrantes  <- gCentroid(as(sf_centro_cuadrantepolicia$geometry, "Spatial"), byid = T)
+  
   
 #Mapa Completo
 
