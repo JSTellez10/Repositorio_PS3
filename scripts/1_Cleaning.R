@@ -14,8 +14,18 @@
 
   library(pacman) 
   
-  p_load(tidyverse, rstudioapi, rio, plotly, leaflet, leaflet, htmlwidgets, SuperLearner, modeldata,
-         rgeos, tmaptools, sf, stargazer, osmdata, scales, dplyr, IRdisplay, spatialsample, geojsonio)
+  p_load(tidyverse, rio, sf, dplyr, osmdata, leaflet, scales, stargazer)
+  
+  p_load(rstudioapi, 
+         rio, 
+         plotly, 
+         htmlwidgets, 
+         modeldata,
+         rgeos, 
+         tmaptools, 
+         IRdisplay, 
+         spatialsample, 
+         geojsonio)
   
    rm(list=ls())
 
@@ -29,7 +39,7 @@
  glimpse(train) #Las dos BD de Train y Test tienen las mismas variables
  
  train <- train %>% mutate(latp=lat,longp=lon, ln_price = log(price))
- train <- st_as_sf(train,coords=c('longp','latp'),crs=4326)
+ train <- st_as_sf(train,coords=c('longp','latp'),crs = 4686)
 
 #Limpieza de la BD ----
  
@@ -75,11 +85,13 @@
                        featuretype = "boundary:administrative", 
                        format_out = "sf_polygon") %>% .$multipolygon
  
+ #Aquí vemos los puntos sobre los cuales queremos predecir su precio de venta
+ 
  leaflet() %>%
            addTiles() %>%
-           addCircles(data=train, radius = 0.1, color = "#473C8B", opacity = 0.5) %>%
-           addPolygons(data=bogota_polig, color = "#5CACEE", opacity = 0.8) %>%
-           addPolygons(data=chapinero, color = "#008B45", opacity = 0.5)
+           addPolygons(data=bogota_polig, color = "#5CACEE", opacity = 0.8, weight = 0.8) %>%
+           addCircles(data=train, radius = 0.1, color = "#00008B", opacity = 0.5) %>%
+           addPolygons(data=chapinero, color = "#EE3B3B", opacity = 0.5)
 
  
 #Descripción y Estadísticas----
@@ -89,27 +101,40 @@
                      as.data.frame() %>%
                      mutate(V1 = scales::dollar(V1))
  
- #Precio
+#Tabla de Estadísticas Descriptivas
+ 
+ estadisticas <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms) %>% as.data.frame()
+ stargazer(round(estadisticas, 3), title="Tabla de Estadísticas descriptivas", type='text')
+ stargazer(round(estadisticas, 3), title="Tabla de Estadísticas descriptivas", type='latex')
+ 
+#Matriz de Correlaciones
+ 
+ stargazer(cor(round(estadisticas, 4)), title="Tabla de Correlaciones", type='text')
+
+#Distribuciones de los precios
+ 
  price_boxplot <- ggplot() +
                   geom_boxplot(aes(y = train$price), fill = "#3FA0FF", alpha=0.5) +
-                  labs(y = "Precio de venta") +
+                  labs(y = "Precio de venta", title = "Distribución de Precio") +
                   scale_x_discrete() + scale_y_continuous(labels = label_dollar(prefix = "$")) + 
                   theme_bw() +
                   theme(axis.title = element_text(size = 10, color = "black", face = "bold"))
  
  price_boxplot
 
- #Log Precio
+#Log Precio
+ 
  price_boxplot_ln <-  ggplot() +
                    geom_boxplot(aes(y = train$ln_price), fill = "#3FA0FF", alpha=0.5) +
-                   labs(y = "Precio de venta (log)") +
+                   labs(y = "Precio de venta (log)", title = "Distribución de Precio (Log)") +
                    scale_x_discrete() + scale_y_continuous(labels = label_dollar(prefix = "$")) + 
                    theme_bw() +
                    theme(axis.title = element_text(size = 10, color = "black", face = "bold"))
  
  price_boxplot_ln
  
- #Precio
+#Precio
+ 
  price_histogram <-   ggplot(data = train, mapping = aes(x = price))  + 
                       geom_histogram(bins = 15, position = 'identity', color="#424242", fill="#BFBFBF") +
                       labs(title = 'Distribución de los precios de venta',
@@ -120,15 +145,16 @@
  
  price_histogram
  
- #Log Precio
+#Log Precio
+ 
  price_histogram_ln <-  ggplot(data = train, mapping = aes(x = ln_price))  + 
                        geom_histogram(bins = 15, position = 'identity', color="#424242", fill="#BFBFBF") +
-                       labs(title = 'Distribución de los precios de venta',
-                       x = 'Precio de Venta',
+                       labs(title = 'Distribución de los precios de venta (Log)',
+                       x = 'Precio de Venta (log)',
                        y = 'Frecuencia') + 
                        scale_x_continuous(labels = label_number()) +
                        theme_bw()
  
  price_histogram_ln
- 
- 
+
+       
