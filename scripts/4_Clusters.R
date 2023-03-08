@@ -5,13 +5,6 @@
 #
 #------------------------------------------------------------------------------#
  
-#Regresiones----
- 
-  reg1 <- lm(price~distancia_hospital + area_hospital, data = train)
-
-  stargazer(reg1,type = "text", dep.var.labels = "Precio del Inmueble", digits = 0)
- 
- 
 #Clusters----
   
   traind_sf1 <- sf::st_as_sf(train, coords = c("Longitude", "Latitude"), remove=FALSE, crs = 4326)
