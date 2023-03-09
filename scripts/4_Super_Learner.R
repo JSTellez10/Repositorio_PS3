@@ -4,45 +4,78 @@
 #                                4 - SUPER LEARNER
 #
 #------------------------------------------------------------------------------#
-  
+
+#Particiones Train-Test
+
   p_load(SuperLearner, caret)
-
-
-  ames<- ames  %>% mutate(logprice=log(Sale_Price))
-  
-
   set.seed(1011)
-  inTrain <- createDataPartition(
-    y = ames$logprice,## La variable dependiente u objetivo 
-    p = .7, ## Usamos 70%  de los datos en el conjunto de entrenamiento 
-    list = FALSE)
   
-  train <- ames[ inTrain,]
-  test  <- ames[-inTrain,]
+  inTrain <- createDataPartition(y = train$price, p = .7, list = FALSE)
+  
+  train_7 <- train[ inTrain,]
+  test_3  <- train[-inTrain,]
+  
   colnames(train)
   
-  ySL<-train$logprice
-  XSL<- train  %>% select(Year_Built, Bldg_Type, Gr_Liv_Area)
+  YSL<-train_7$price
+  
+  XSL<- train_7 %>% select(surface_total,surface_covered,rooms,bedrooms,bathrooms,property_type,area_maxima,
+                             distancia_parque,distancia_museo,distancia_ips,distancia_ese,distancia_colegios,distancia_cai, 
+                             distancia_best,distancia_centrof,distancia_cuadrantes,distancia_buses,distancia_tm,
+                             total_eventos_2022)
+  
+#Regresiones Simples----
+
+  glimpse(train)
+  
+  reg1 <- lm(price~distancia_parque+distancia_museo+distancia_ips+distancia_ese +distancia_colegios+distancia_cai+ 
+               distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
+               total_eventos_2022, data = train_7)
+  
+  stargazer(reg1, type = "text", dep.var.labels = "Precio de venta", digits = 4)
+  summary(reg1)
+  
+  test_3$y_hat <- predict(reg1, newdata = test_3)
+  MSE_model1 <- with(test_3, mean((price - y_hat)^2)) #Calculating the MSE
+  MSE_model1
+
+#Elastic Net ----
+
+  set.seed(123)
+  fitControl <- trainControl(method = "cv", number = 5)
+
+  EN <-  train(y=YSL,x=XSL, 
+               method = 'glmnet', 
+               trControl = fitControl,
+               tuneGrid = expand.grid(alpha = seq(0,1,by = 0.1),lambda = seq(0.001,0.02,by = 0.001)),
+               preProcess = c("center", "scale")) 
+  
+  coef_EN <- coef(EN$finalModel, EN$bestTune$lambda)
+  coef_EN
+
+#Super Learner----
+
+
   
   sl.lib <- c("SL.randomForest", "SL.lm") #lista de los algoritmos a correr
   
-  # Fit using the SuperLearner package,
+  #Fit using the SuperLearner package
   
-  fitY <- SuperLearner(Y = ySL,  X= data.frame(XSL),
+  fitY <- SuperLearner(Y = YSL,  X= data.frame(XSL),
                        method = "method.NNLS", # combinación convexa
                        SL.library = sl.lib)
   
   fitY
   
-  test <- test  %>%  mutate(yhat_Sup=predict(fitY, newdata = data.frame(test), onlySL = T)$pred)
-  head(test$yhat_Sup)
+  test_3 <- test_3  %>%  mutate(yhat_Sup = predict(fitY, newdata = data.frame(test_3), onlySL = T)$pred)
+  head(test_3$yhat_Sup)
   
   with(test,mean(abs(logprice-yhat_Sup))) #MAE
   
-  #Customize the defaults for random forest.
+  #Customize the defaults for random forest
   custon_ranger = create.Learner("SL.ranger", params = list(num.trees = 1000))
   
-  #Look at the object.
+  #Look at the object
   custon_ranger$names
   
   custom_rf = create.Learner("SL.randomForest",
@@ -60,52 +93,43 @@
   
   #Fit (takes forever)
   
-  fitY_long <- SuperLearner(Y = ySL, X = data.frame(XSL),
+  fitY_long <- SuperLearner(Y = YSL, X = data.frame(XSL),
                             method = "method.NNLS", SL.library = sl.lib2)
   
   fitY_long
   
   #Spatial Cross Validation
   
-  ames_sf <- sf::st_as_sf(
-    ames,
-    # "coords" is in x/y order -- so longitude goes first!
-    coords = c("Longitude", "Latitude"),
-    # Set our coordinate reference system to EPSG:4326,
-    # the standard WGS84 geodetic coordinate reference system
-    crs = 4326
-  )
+  train_sf_4326 <- sf::st_as_sf(train, coords = c("lon", "lat"), crs = 4326)
   
   set.seed(123)
-  block_folds <- spatial_block_cv(ames_sf, v = 15)
+  
+  block_folds <- spatial_block_cv(train_sf_4326, v = 15)
   
   autoplot(block_folds) + theme_bw()
   
   set.seed(123)
-  cluster_folds <- spatial_clustering_cv(ames_sf, v = 15)
+  
+  cluster_folds <- spatial_clustering_cv(train_sf_4326, v = 15)
   autoplot(cluster_folds) + theme_bw()
   
   set.seed(123)
-  location_folds <- 
-    spatial_leave_location_out_cv(
-      ames_sf,
-      group = Neighborhood,
-      v = 15
-    )
+  
+  location_folds <- spatial_leave_location_out_cv(train_sf_4326, group = Neighborhood, v = 15)
   
   autoplot(location_folds)+ theme_bw()
   
-  table(ames_sf$Neighborhood)
+  table(train_sf_4326$Neighborhood)
   
-  ames_sf <- ames_sf   %>% mutate(Neighborhood=droplevels(Neighborhood))
+  train_sf_4326 <- train_sf_4326   %>% mutate(Neighborhood=droplevels(Neighborhood))
   
-  table(ames_sf$Neighborhood)
+  table(train_sf_4326$Neighborhood)
   
-  length(unique(ames_sf$Neighborhood))
+  length(unique(train_sf_4326$Neighborhood))
   
-  test_neigh<- ames_sf  %>% filter(Neighborhood=="North_Ames")
+  test_neigh<- train_sf_4326  %>% filter(Neighborhood=="North_Ames")
   test_neigh <- test_neigh   %>% mutate(Neighborhood=droplevels(Neighborhood))
-  train_neigh<- ames_sf  %>% filter(Neighborhood!="North_Ames")
+  train_neigh<- train_sf_4326  %>% filter(Neighborhood!="North_Ames")
   train_neigh <- train_neigh   %>% mutate(Neighborhood=droplevels(Neighborhood))
   
   y_neigh<-train_neigh$logprice
