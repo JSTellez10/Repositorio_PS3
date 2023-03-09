@@ -12,7 +12,6 @@
   #https://github.com/AndresMPL/Repositorio_PS3/tree/main/datasets/localidades
   #Guardar estas carpetas en una carpeta llamada "datos" y fijar el directorio de trabajo en esta última carpeta contenedora
 
-  localidades <-st_read("datos/localidades")
   parques <-st_read("datos/parques")
   museos <-st_read("datos/museos")
   ips <-st_read("datos/ips")
@@ -23,8 +22,19 @@
   centro_financiero <-st_read("datos/centro_financiero")
   delitos <-st_read("datos/delitos")
   cuadrantepolicia <-st_read("datos/cuadrantepolicia")
-
-
+  
+  #En "Delitos" generamos un total de casos para el año 2022
+  #En el siguiente enlace se encuentra la descripción de las etiquetas de Delitos:
+  #https://oaiee.scj.gov.co/agc/rest/services/Tematicos_Pub/CifrasSCJ/MapServer/layers
+  
+  delitos <- delitos %>% mutate(total_eventos_2022 = CMH22CONT+CMLP22CONT+CMHP22CONT+CMHR22CONT+CMHA22CONT+CMHB22CONT+
+                                                     CMHCE22CON+CMHM22CONT+CMHC22CONT+CMDS22CONT+CMVI22CONT)
+  
+  delitos <- delitos %>% filter(total_eventos_2022 > 0)
+  delitos <- delitos %>% select(CMNOMLOCAL, total_eventos_2022, geometry)
+  train <- st_join(train, delitos) #En cada inmueble agregamos el número de delitos de la localidad
+  
+  
   #Datos descargados de Open Street Map
   
   chapinero <- getbb(place_name = "UPZ Chapinero, Bogotá",
@@ -40,10 +50,6 @@
   bogota_mapa <- opq(bbox = getbb("Bogotá Colombia"))
   
 #Transformamos los archivos de cada variable
-  
-  #Localidades
-  localidades <- st_transform(localidades,4686)
-  sf_localidades = localidades %>% st_sf
   
   #Parques
   parques <- st_transform(parques,4686)
@@ -76,32 +82,25 @@
   #Centro financiero
   centro_financiero <- st_transform(centro_financiero,4686)
   sf_centro_financiero = centro_financiero %>% st_sf
-  
-  #Delitos
-  centro_delitos <- st_transform(delitos,4686)
-  sf_centro_delitos = centro_delitos %>% st_sf
-  
+
   #Cuadrantes Policia
   centro_cuadrantepolicia <- st_transform(cuadrantepolicia,4686)
   sf_centro_cuadrantepolicia = centro_cuadrantepolicia %>% st_sf
   
-  #Paradas de buses----
+  #Paradas de buses
   
-  buses <- bogota %>% add_osm_feature(key="highway",value="bus_stop") %>% osmdata_sf()
-  buses_puntos <- buses$osm_point
+  buses <- bogota_mapa %>% add_osm_feature(key="highway",value="bus_stop") %>% osmdata_sf()
+  buses_puntos <- buses$osm_points
   
-  leaflet() %>%
-    addTiles() %>%
-    addCircles(data=buses_puntos, color = "#27408B", opacity = 0.7)
+  #Transmilenio (Buscamos estaciones de TM)
   
-  #Estaciones de Transmilenio----
-  
-  estaciones_tm <- bogota %>% add_osm_feature(key="amenity", value = "bus_station") %>% osmdata_sf()
+  estaciones_tm <- bogota_mapa %>% add_osm_feature(key="amenity", value = "bus_station") %>% osmdata_sf()
   estaciones_tm_puntos <- estaciones_tm$osm_points
+
+  #Delitos
   
-  leaflet() %>%
-    addTiles() %>%
-    addCircles(data=estaciones_tm_puntos, color = "#00868B", opacity = 1)
+  delitos <- st_transform(delitos,4686)
+  sf_delitos = delitos %>% st_sf
   
   
 #Generamos los centroides de cada variable
@@ -114,7 +113,6 @@
   centroides_cai      <- gCentroid(as(sf_cai$geometry, "Spatial"), byid = T)
   centroides_best     <- gCentroid(as(sf_biblioestacion$geometry, "Spatial"), byid = T)
   centroides_centrof  <- gCentroid(as(sf_centro_financiero$geometry, "Spatial"), byid = T)
-  centroides_delitos  <- gCentroid(as(delitos_geom$geometry, "Spatial"), byid = T)
   centroides_cuadrantes  <- gCentroid(as(sf_centro_cuadrantepolicia$geometry, "Spatial"), byid = T)
   
   
@@ -122,10 +120,9 @@
 
   leaflet() %>%
     addTiles() %>%
-    #addPolygons(data=bogota, color = "#5CACEE", opacity = 0.4) %>%
-    #addCircles(data=train, radius = 0.1, color = "#DAA520", opacity = 2) %>%
+    addPolygons(data=bogota, color = "#5CACEE", opacity = 0.4) %>%
+    addCircles(data=train, radius = 0.1, color = "#DAA520", opacity = 2) %>%
     addPolygons(data=chapinero, color = "#008B45", opacity = 0.4)%>%
-    #addPolygons(data=sf_localidades, color = "#5CACEE", opacity = 1)%>%
     #addCircles(lng = centroides_colegios$x, lat = centroides_colegios$y, col = "#00CDCD", opacity = 0.8, radius = 0.5, popup = sf_colegios$NOMBRE_EST)%>%
     #addCircles(lng = centroides_parques$x, lat = centroides_parques$y, col = "#00EE00", opacity = 0.8, radius = 0.5, popup = sf_parques$NOMBRE)%>%
     #addCircles(lng = centroides_ips$x, lat = centroides_ips$y, col = "#FF3030", opacity = 0.8, radius = 0.5, popup = sf_ips$nombre_pre)%>%
@@ -134,7 +131,7 @@
     #addCircles(lng = centroides_cai$x, lat = centroides_cai$y, col = "#008B00", opacity = 0.8, radius = 0.5, popup = sf_cai$CAIDESCRIP) %>%
     #addCircles(lng = centroides_best$x, lat = centroides_best$y, col = "#008B00", opacity = 0.8, radius = 0.5, popup = sf_biblioestacion$LecNombre) %>%
     #addCircles(lng = centroides_centrof$x, lat = centroides_centrof$y, col = "#008B00", opacity = 0.8, radius = 0.5)  #%>%
-    #addCircles(lng = centroides_delitos$x, lat = centroides_delitos$y, col = "#008B00", opacity = 0.8, radius = 0.5) %>%
-    #addCircles(lng = centroides_cuadrantes$x, lat = centroides_cuadrantes$y, col = "#008B00", opacity = 0.8, radius = 0.5)
+    #addPolygons(data = sf_delitos, fillColor  = sf_delitos$total_eventos_2022) %>%
+    addCircles(lng = centroides_cuadrantes$x, lat = centroides_cuadrantes$y, col = "#008B00", opacity = 0.8, radius = 0.5)
   
   
