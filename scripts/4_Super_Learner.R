@@ -129,7 +129,7 @@
   test_3 <- test_3  %>%  mutate(yhat_Sup = predict(fitY, newdata = data.frame(test_3), onlySL = T)$pred)
   head(test_3$yhat_Sup)
   
-  with(test,mean(abs(logprice-yhat_Sup))) #MAE
+  with(test_3,mean(abs(price-yhat_Sup))) #MAE
   
   #Customize the defaults for random forest
   custon_ranger = create.Learner("SL.ranger", params = list(num.trees = 1000))
