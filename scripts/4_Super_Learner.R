@@ -17,12 +17,13 @@
   
   colnames(train)
   
-  YSL<-train_7$price
+  YSL <-train_7$price
   
-  XSL<- train_7 %>% select(surface_total,surface_covered,rooms,bedrooms,bathrooms,property_type,area_maxima,
+  XSL <- train_7 %>% select(surface_total,surface_covered,rooms,bedrooms,bathrooms,property_type,area_maxima,
                              distancia_parque,distancia_museo,distancia_ips,distancia_ese,distancia_colegios,distancia_cai, 
                              distancia_best,distancia_centrof,distancia_cuadrantes,distancia_buses,distancia_tm,
-                             total_eventos_2022)
+                             total_eventos_2022) %>% as.data.frame()
+  XSL <- XSL %>% select(-geometry) %>% as.data.frame()
   
 #Regresiones Simples----
 
