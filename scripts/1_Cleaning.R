@@ -14,18 +14,8 @@
 
   library(pacman) 
   
-  p_load(tidyverse, rio, sf, dplyr, osmdata, leaflet, scales, stargazer)
-  
-  p_load(rstudioapi, 
-         rio, 
-         plotly, 
-         htmlwidgets, 
-         modeldata,
-         rgeos, 
-         tmaptools, 
-         IRdisplay, 
-         spatialsample, 
-         geojsonio)
+  p_load(tidyverse, rio, sf, dplyr, osmdata, leaflet, scales, stargazer,rstudioapi, 
+         rio, plotly, modeldata, rgeos, tmaptools, IRdisplay, spatialsample, geojsonio)
   
    rm(list=ls())
 
@@ -50,6 +40,12 @@
  
  filtro <- is.na(train$surface_covered) #Trasnsformamos los NA a ceros
  train$surface_covered[filtro] <- 0
+ 
+ filtro <- is.na(train$bedrooms) #Trasnsformamos los NA a ceros #REVISAR
+ train$bedrooms[filtro] <- 0
+ 
+ filtro <- is.na(train$bathrooms) #Trasnsformamos los NA a ceros #REVISAR
+ train$bathrooms[filtro] <- 0
  
  filtro <- is.na(train$lat) | is.na(train$lon) #| is.na(train$rooms) | is.na(train$bathrooms) #| is.na(train$surface_total) | is.na(train$surface_covered) 
  train <- train[!filtro, ] #Filtramos los registros sin lat y lon
