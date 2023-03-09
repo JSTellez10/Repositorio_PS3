@@ -14,6 +14,7 @@
 
   library(pacman) 
   
+  #Cargamos las siguientes librerías verificando que no existen alertas por funciones duplicadas entre ellas
   p_load(tidyverse, rio, sf, dplyr, osmdata, leaflet, scales, stargazer,rstudioapi, 
          rio, plotly, modeldata, rgeos, tmaptools, IRdisplay, spatialsample, geojsonio)
   
@@ -47,6 +48,9 @@
  filtro <- is.na(train$bathrooms) #Trasnsformamos los NA a ceros #REVISAR
  train$bathrooms[filtro] <- 0
  
+ filtro <- is.na(train$rooms) #Trasnsformamos los NA a ceros #REVISAR
+ train$rooms[filtro] <- 0
+
  filtro <- is.na(train$lat) | is.na(train$lon) #| is.na(train$rooms) | is.na(train$bathrooms) #| is.na(train$surface_total) | is.na(train$surface_covered) 
  train <- train[!filtro, ] #Filtramos los registros sin lat y lon
  
@@ -100,6 +104,7 @@
 #Tabla de Estadísticas Descriptivas
  
  estadisticas <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms) %>% as.data.frame()
+ estadisticas <- estadisticas %>% select(-geometry) %>% as.data.frame()
  stargazer(round(estadisticas, 3), title="Tabla de Estadísticas descriptivas", type='text')
  stargazer(round(estadisticas, 3), title="Tabla de Estadísticas descriptivas", type='latex')
  
