@@ -22,6 +22,7 @@
   centro_financiero <-st_read("datos/centro_financiero")
   delitos <-st_read("datos/delitos")
   cuadrantepolicia <-st_read("datos/cuadrantepolicia")
+  estratos <-st_read("datos/estrato")
   
   #En "Delitos" generamos un total de casos para el año 2022
   #En el siguiente enlace se encuentra la descripción de las etiquetas de Delitos:
@@ -31,10 +32,12 @@
                                                      CMHCE22CON+CMHM22CONT+CMHC22CONT+CMDS22CONT+CMVI22CONT)
   
   delitos <- delitos %>% filter(total_eventos_2022 > 0)
-  delitos <- delitos %>% select(CMNOMLOCAL, total_eventos_2022, geometry)
+  delitos <- delitos %>% select(CMNOMLOCAL, total_eventos_2022, geometry) #Nos quedamos solo con estos tres datos para unirlos a la BD Train-Test
   train <- st_join(train, delitos) #En cada inmueble agregamos el número de delitos de la localidad
   
-  
+  estratos <- estratos %>% select(ESTRATO, geometry)
+  train <- st_join(train, estratos) #En cada inmueble agregamos el estrato de la manza en la cual se encuentra localidado
+
   #Datos descargados de Open Street Map
   
   chapinero <- getbb(place_name = "UPZ Chapinero, Bogotá",
