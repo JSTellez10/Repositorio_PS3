@@ -20,6 +20,15 @@ test$surface_total[filtro] <- 0
 filtro <- is.na(test$surface_covered) #Trasnsformamos los NA a ceros
 test$surface_covered[filtro] <- 0
 
+filtro <- is.na(test$bedrooms) #Trasnsformamos los NA a ceros #REVISAR
+test$bedrooms[filtro] <- 0
+
+filtro <- is.na(test$bathrooms) #Trasnsformamos los NA a ceros #REVISAR
+test$bathrooms[filtro] <- 0
+
+filtro <- is.na(test$rooms) #Trasnsformamos los NA a ceros #REVISAR
+test$rooms[filtro] <- 0
+
 filtro <- is.na(test$lat) | is.na(test$lon) #| is.na(test$rooms) | is.na(test$bathrooms) #| is.na(test$surface_total) | is.na(test$surface_covered) 
 test <- test[!filtro, ] #Filtramos los registros sin lat y lon
 
@@ -152,7 +161,7 @@ test$distancia_tm <- dist_min
 
 #Predicciones para Kaggle----
 
-test$price <- predict(reg1, newdata = test)
+test$price <- predict(EN4, newdata = test)
 exportar <- test %>% select(property_id, price, -geometry) %>% as.data.frame()
 exportar <- exportar %>% select(property_id,price)
 write.csv(exportar, "submission.csv", row.names = FALSE)
