@@ -35,28 +35,86 @@
   stargazer(reg1, type = "text", dep.var.labels = "Precio de venta", digits = 4)
   summary(reg1)
   
-  test_3$y_hat <- predict(reg1, newdata = test_3)
-  MSE_model1 <- with(test_3, mean((price - y_hat)^2)) #Calculating the MSE
-  MSE_model1
+  test_3$y_hat1 <- predict(reg1, newdata = test_3)
+  MAE_model1 <- with(test_3, mean(abs(price - y_hat1))) #Calculating the MAE
+  MAE_model1
+  
+  
+  reg2 <- lm(price~surface_total+surface_covered+rooms+bedrooms+bathrooms+property_type+area_maxima+
+             distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
+             distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
+             total_eventos_2022, data = train_7)
+  
+  stargazer(reg2, type = "text", dep.var.labels = "Precio de venta", digits = 4)
+  summary(reg2)
+  
+  test_3$y_hat2 <- predict(reg2, newdata = test_3)
+  MAE_model2 <- with(test_3, mean(abs(price - y_hat2))) #Calculating the MSE
+  MAE_model2
 
 #Elastic Net ----
 
-  set.seed(123)
+  sapply(train_7, function(x) sum(is.na(x))) %>% as.data.frame()  #Revisamos los NA de las variables
+  
+  set.seed(10101)
   fitControl <- trainControl(method = "cv", number = 5)
 
-  EN <-  train(y=YSL,x=XSL, 
+  EN <-  train(price~surface_total+surface_covered+rooms+bedrooms+bathrooms+property_type+area_maxima+
+                 distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
+                 distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
+                 total_eventos_2022, data = train_7, 
+                 method = 'glmnet', 
+                 trControl = fitControl,
+                 tuneGrid = expand.grid(alpha = 0.5,lambda = seq(0.001,0.02,by = 0.001)),
+                 preProcess = c("center", "scale")) 
+    
+  test_3$y_hat3 <- predict(EN, newdata = test_3)
+  MAE_model3 <- with(test_3, mean(abs(price - y_hat3))) #Calculating the MSE
+  MAE_model3
+
+  
+  EN2 <-  train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
+                  distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
+                  distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
+                  total_eventos_2022+I(total_eventos_2022^2), data = train_7, 
                method = 'glmnet', 
                trControl = fitControl,
                tuneGrid = expand.grid(alpha = seq(0,1,by = 0.1),lambda = seq(0.001,0.02,by = 0.001)),
                preProcess = c("center", "scale")) 
   
-  coef_EN <- coef(EN$finalModel, EN$bestTune$lambda)
-  coef_EN
-
-#Super Learner----
-
+  test_3$y_hat4 <- predict(EN2, newdata = test_3)
+  MAE_model4 <- with(test_3, mean(abs(price - y_hat4))) #Calculating the MSE
+  MAE_model4
+  
+  EN3 <-  train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
+                  distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
+                  distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
+                  total_eventos_2022+I(total_eventos_2022^2)+ I(distancia_cai^2)+(distancia_colegios^2), data = train_7, 
+                method = 'glmnet', 
+                trControl = fitControl,
+                tuneGrid = expand.grid(alpha = seq(0,1,by = 0.1),lambda = seq(0.001,0.02,by = 0.001)),
+                preProcess = c("center", "scale")) 
+  
+  test_3$y_hat5 <- predict(EN3, newdata = test_3)
+  MAE_model5 <- with(test_3, mean(abs(price - y_hat5))) #Calculating the MSE
+  MAE_model5
+  
+  EN4 <-  train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
+                  distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
+                  distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
+                  total_eventos_2022+I(total_eventos_2022^2)+ I(distancia_cai^2)+I(distancia_colegios^2), data = train_7, 
+                method = 'glmnet', 
+                trControl = fitControl,
+                tuneGrid = expand.grid(alpha = seq(0,1,by = 0.1),lambda = seq(0.001,0.02,by = 0.001)),
+                preProcess = c("center", "scale")) 
+  
+  test_3$y_hat6 <- predict(EN4, newdata = test_3)
+  MAE_model6 <- with(test_3, mean(abs(price - y_hat6))) #Calculating the MSE
+  MAE_model6
 
   
+#Super Learner----
+
   sl.lib <- c("SL.randomForest", "SL.lm") #lista de los algoritmos a correr
   
   #Fit using the SuperLearner package
