@@ -19,10 +19,10 @@
   
   YSL <-train_7$price
   
-  XSL <- train_7 %>% select(surface_total,surface_covered,rooms,bedrooms,bathrooms,property_type,area_maxima,
-                             distancia_parque,distancia_museo,distancia_ips,distancia_ese,distancia_colegios,distancia_cai, 
-                             distancia_best,distancia_centrof,distancia_cuadrantes,distancia_buses,distancia_tm,
-                             total_eventos_2022) %>% as.data.frame()
+  XSL <- train_7 %>% select(rooms,bedrooms,bathrooms,property_type,area_maxima,distancia_parque,distancia_museo,distancia_ips, 
+                              distancia_ese, distancia_colegios, distancia_cai, distancia_best, distancia_centrof, distancia_cuadrantes, 
+                              distancia_buses, distancia_tm, total_eventos_2022) %>% as.data.frame()
+  
   XSL <- XSL %>% select(-geometry) %>% as.data.frame()
   
 #Regresiones Simples----
@@ -53,29 +53,42 @@
   MAE_model2 <- with(test_3, mean(abs(price - y_hat2))) #Calculating the MSE
   MAE_model2
 
-  reg31 <- lm(price~surface_total+surface_covered+rooms+bedrooms+bathrooms+property_type+area_maxima+
+  reg21 <- lm(price~surface_total+surface_covered+rooms+bedrooms+bathrooms+property_type+area_maxima+
                distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
                distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
                total_eventos_2022+I(total_eventos_2022^2)+I(distancia_cai^2)+(distancia_colegios^2), data = train_7)
   
-  stargazer(reg31, type = "text", dep.var.labels = "Precio de venta", digits = 4)
-  summary(reg31)
+  stargazer(reg21, type = "text", dep.var.labels = "Precio de venta", digits = 4)
+  summary(reg21)
   
-  test_3$y_hat31 <- predict(reg31, newdata = test_3)
-  MAE_model31 <- with(test_3, mean(abs(price - y_hat31))) #Calculating the MSE
-  MAE_model31
+  test_3$y_hat21 <- predict(reg21, newdata = test_3)
+  MAE_model21 <- with(test_3, mean(abs(price - y_hat21))) #Calculating the MSE
+  MAE_model21
+  
+  
+  reg22 <- lm(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
+                distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
+                distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
+                total_eventos_2022+I(total_eventos_2022^2)+I(distancia_cai^2)+(distancia_colegios^2), data = train_7)
+  
+  stargazer(reg22, type = "text", dep.var.labels = "Precio de venta", digits = 4)
+  summary(reg22)
+  
+  test_3$y_hat22 <- predict(reg22, newdata = test_3)
+  MAE_model22 <- with(test_3, mean(abs(price - y_hat22))) #Calculating the MSE
+  MAE_model22
   
 #Elastic Net ----
 
   sapply(train_7, function(x) sum(is.na(x))) %>% as.data.frame()  #Revisamos los NA de las variables
   
   set.seed(10101)
-  fitControl <- trainControl(method = "cv", number = 5)
+  fitControl <- trainControl(method = "cv", number = 10)
 
-  EN <-  train(price~surface_total+surface_covered+rooms+bedrooms+bathrooms+property_type+area_maxima+
+  EN <-  train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
                  distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
                  distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
-                 total_eventos_2022, data = train_7, 
+                 total_eventos_2022+I(total_eventos_2022^2)+I(distancia_cai^2)+(distancia_colegios^2), data = train_7, 
                  method = 'glmnet', 
                  trControl = fitControl,
                  tuneGrid = expand.grid(alpha = 0.5,lambda = seq(0.001,0.02,by = 0.001)),
