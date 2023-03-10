@@ -53,6 +53,18 @@
   MAE_model2 <- with(test_3, mean(abs(price - y_hat2))) #Calculating the MSE
   MAE_model2
 
+  reg31 <- lm(price~surface_total+surface_covered+rooms+bedrooms+bathrooms+property_type+area_maxima+
+               distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
+               distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
+               total_eventos_2022+I(total_eventos_2022^2)+I(distancia_cai^2)+(distancia_colegios^2), data = train_7)
+  
+  stargazer(reg31, type = "text", dep.var.labels = "Precio de venta", digits = 4)
+  summary(reg31)
+  
+  test_3$y_hat31 <- predict(reg31, newdata = test_3)
+  MAE_model31 <- with(test_3, mean(abs(price - y_hat31))) #Calculating the MSE
+  MAE_model31
+  
 #Elastic Net ----
 
   sapply(train_7, function(x) sum(is.na(x))) %>% as.data.frame()  #Revisamos los NA de las variables
@@ -99,6 +111,7 @@
   test_3$y_hat5 <- predict(EN3, newdata = test_3)
   MAE_model5 <- with(test_3, mean(abs(price - y_hat5))) #Calculating the MSE
   MAE_model5
+  
   
   EN4 <-  train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
                   distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
