@@ -35,8 +35,8 @@
   delitos <- delitos %>% select(CMNOMLOCAL, total_eventos_2022, geometry) #Nos quedamos solo con estos tres datos para unirlos a la BD Train-Test
   train <- st_join(train, delitos) #En cada inmueble agregamos el número de delitos de la localidad
   
-  estratos <- estratos %>% select(ESTRATO, geometry)
-  train <- st_join(train, estratos) #En cada inmueble agregamos el estrato de la manza en la cual se encuentra localidado
+  #estratos <- estratos %>% select(ESTRATO, geometry)
+  #train <- st_join(train, estratos, join = st_intersection, left = TRUE) #En cada inmueble agregamos el estrato de la manza en la cual se encuentra localidado
 
   #Datos descargados de Open Street Map
   
@@ -125,7 +125,7 @@
     addTiles() %>%
     addPolygons(data=bogota, color = "#5CACEE", opacity = 0.4) %>%
     addCircles(data=train, radius = 0.1, color = "#DAA520", opacity = 2) %>%
-    addPolygons(data=chapinero, color = "#008B45", opacity = 0.4)%>%
+    addPolygons(data=chapinero, color = "#008B45", opacity = 0.4) #%>%
     #addCircles(lng = centroides_colegios$x, lat = centroides_colegios$y, col = "#00CDCD", opacity = 0.8, radius = 0.5, popup = sf_colegios$NOMBRE_EST)%>%
     #addCircles(lng = centroides_parques$x, lat = centroides_parques$y, col = "#00EE00", opacity = 0.8, radius = 0.5, popup = sf_parques$NOMBRE)%>%
     #addCircles(lng = centroides_ips$x, lat = centroides_ips$y, col = "#FF3030", opacity = 0.8, radius = 0.5, popup = sf_ips$nombre_pre)%>%
@@ -135,6 +135,7 @@
     #addCircles(lng = centroides_best$x, lat = centroides_best$y, col = "#008B00", opacity = 0.8, radius = 0.5, popup = sf_biblioestacion$LecNombre) %>%
     #addCircles(lng = centroides_centrof$x, lat = centroides_centrof$y, col = "#008B00", opacity = 0.8, radius = 0.5)  #%>%
     #addPolygons(data = sf_delitos, fillColor  = sf_delitos$total_eventos_2022) %>%
-    addCircles(lng = centroides_cuadrantes$x, lat = centroides_cuadrantes$y, col = "#008B00", opacity = 0.8, radius = 0.5)
+    #addCircles(lng = centroides_cuadrantes$x, lat = centroides_cuadrantes$y, col = "#008B00", opacity = 0.8, radius = 0.5)
+    
   
   
