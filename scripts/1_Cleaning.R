@@ -14,6 +14,11 @@
 
   library(pacman) 
   
+  setwd("C:/Users/User/Documents/Big_Data/BD_Taller 3") 
+  #Para iniciar se debe decargar todas las carpetas del siguiente sitio:
+  #https://raw.githubusercontent.com/AndresMPL/Repositorio_PS3/main/datasets/
+  #Guardarlas en una carpeta "datos" y fijar el directorio donde se encuentre esta carpeta
+  
   #Cargamos las siguientes librerías verificando que no existen alertas por funciones duplicadas entre ellas
   p_load(tidyverse, rio, sf, dplyr, osmdata, leaflet, scales, stargazer,rstudioapi, 
          rio, plotly, modeldata, rgeos, tmaptools, IRdisplay, spatialsample, geojsonio)
