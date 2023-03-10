@@ -127,7 +127,6 @@ head(train_sf)
   centroides_tm <- st_as_sf(estaciones_tm_puntos, coords = c("x", "y"))
   st_crs(centroides_tm) <- 4686
   dist_matrix <- st_distance(x = train_sf, y = centroides_tm)
-  
   dist_min <- apply(dist_matrix, 1, min)
   
   train$distancia_tm <- dist_min
