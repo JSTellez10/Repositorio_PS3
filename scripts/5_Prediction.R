@@ -61,15 +61,12 @@ test_sf <- st_transform(test_sf,4686)
 
 ##Parques----
 
-centroides_parques_d <- st_as_sf(centroides_parques, coords = c("x", "y"))
 dist_matrix <- st_distance(x = test_sf, y = centroides_parques_d)
 dist_min <- apply(dist_matrix, 1, min)
 
 test$distancia_parque <- dist_min
 
 ##Museos----
-
-centroides_museos_d <- st_as_sf(centroides_museos, coords = c("x", "y"))
 
 dist_matrix <- st_distance(x = test_sf, y = centroides_museos_d)
 dist_min <- apply(dist_matrix, 1, min)
@@ -78,16 +75,12 @@ test$distancia_museo <- dist_min
 
 ##IPS----
 
-centroides_ips_d <- st_as_sf(centroides_ips, coords = c("x", "y"))
-
 dist_matrix <- st_distance(x = test_sf, y = centroides_ips_d)
 dist_min <- apply(dist_matrix, 1, min)
 
 test$distancia_ips <- dist_min
 
 ##ESE----
-
-centroides_ese_d <- st_as_sf(centroides_ese, coords = c("x", "y"))
 
 dist_matrix <- st_distance(x = test_sf, y = centroides_ese_d)
 dist_min <- apply(dist_matrix, 1, min)
@@ -96,16 +89,12 @@ test$distancia_ese <- dist_min
 
 ##Colegios----
 
-centroides_colegios_d <- st_as_sf(centroides_colegios, coords = c("x", "y"))
-
 dist_matrix <- st_distance(x = test_sf, y = centroides_colegios_d)
 dist_min <- apply(dist_matrix, 1, min)
 
 test$distancia_colegios <- dist_min
 
 ##CAI----
-
-centroides_cai_d <- st_as_sf(centroides_cai, coords = c("x", "y"))
 
 dist_matrix <- st_distance(x = test_sf, y = centroides_cai_d)
 dist_min <- apply(dist_matrix, 1, min)
@@ -114,16 +103,12 @@ test$distancia_cai <- dist_min
 
 ##Biblo Estaciones----
 
-centroides_best_d <- st_as_sf(centroides_best, coords = c("x", "y"))
-
 dist_matrix <- st_distance(x = test_sf, y = centroides_best_d)
 dist_min <- apply(dist_matrix, 1, min)
 
 test$distancia_best <- dist_min
 
 ##Centros Financieros----
-
-centroides_centrof_d <- st_as_sf(centroides_centrof, coords = c("x", "y"))
 
 dist_matrix <- st_distance(x = test_sf, y = centroides_centrof_d)
 dist_min <- apply(dist_matrix, 1, min)
@@ -132,8 +117,6 @@ test$distancia_centrof <- dist_min
 
 ##Cuadrante Policía----
 
-centroides_cuadrantes_d  <- st_as_sf(centroides_cuadrantes , coords = c("x", "y"))
-
 dist_matrix <- st_distance(x = test_sf, y = centroides_cuadrantes_d)
 dist_min <- apply(dist_matrix, 1, min)
 
@@ -141,8 +124,6 @@ test$distancia_cuadrantes <- dist_min
 
 ##Estaciones de buses----
 
-buses_puntos_d <- st_as_sf(buses_puntos, coords = c("x", "y"))
-st_crs(buses_puntos_d) <- 4686
 dist_matrix <- st_distance(x = test_sf, y = buses_puntos_d)
 dist_min <- apply(dist_matrix, 1, min)
 
@@ -150,10 +131,7 @@ test$distancia_buses <- dist_min
 
 ##Estaciones de Transmilenio----
 
-centroides_tm <- st_as_sf(estaciones_tm_puntos, coords = c("x", "y"))
-st_crs(centroides_tm) <- 4686
 dist_matrix <- st_distance(x = test_sf, y = centroides_tm)
-
 dist_min <- apply(dist_matrix, 1, min)
 
 test$distancia_tm <- dist_min
@@ -161,8 +139,8 @@ test$distancia_tm <- dist_min
 
 #Predicciones para Kaggle----
 
-test$price <- predict(EN4, newdata = test)
+test$price <- predict(reg21, newdata = test)
 exportar <- test %>% select(property_id, price, -geometry) %>% as.data.frame()
-exportar <- exportar %>% select(property_id,price)
+exportar <- exportar %>% select(property_id, price) %>% as.data.frame()
 write.csv(exportar, "submission.csv", row.names = FALSE)
 
