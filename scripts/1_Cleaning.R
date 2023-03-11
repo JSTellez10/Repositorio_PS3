@@ -278,9 +278,6 @@
    descripcion <- tolower(descripcion)
    descripcion <- stripWhitespace(descripcion)
    
-   descripcion2 <- tibble(n_descripcion = 1:38644, text_descripcion = descripcion)
-   descripcion2
-   
    # Generar bigramas
    
    bigrams <- as.data.frame(descripcion) %>%
