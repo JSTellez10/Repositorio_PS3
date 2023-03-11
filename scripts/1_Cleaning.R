@@ -195,3 +195,5 @@
      addCircles(lng = train$lon,
                 lat = train$lat,
                 col = color)
+   
+   
