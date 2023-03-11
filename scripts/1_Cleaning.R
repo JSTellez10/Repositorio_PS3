@@ -79,64 +79,6 @@
    
  map1
  
-#Tabla de Estadísticas Descriptivas - Antes de limpieza
- 
- summary(train$price) %>%
-         as.matrix() %>%
-         as.data.frame() %>%
-         mutate(V1 = scales::dollar(V1))
- 
- estadisticas <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms) %>% as.data.frame()
- estadisticas <- estadisticas %>% select(-geometry) %>% as.data.frame()
- stargazer(round(estadisticas), digits = 2, title="Tabla de Estadísticas descriptivas", type='text')
- stargazer(round(estadisticas), digits = 2, title="Tabla de Estadísticas descriptivas", type='latex')
- 
- 
-#Distribuciones de los precios
- 
- price_boxplot <- ggplot() +
-                  geom_boxplot(aes(y = train$price), fill = "#BFBFBF", alpha=0.5) +
-                  labs(y = "Precio de venta", title = "Distribución de Precio") +
-                  scale_x_discrete() + scale_y_continuous(labels = label_dollar(prefix = "$")) + 
-                  theme_bw() +
-                  theme(axis.title = element_text(size = 10, color = "black", face = "bold"))
- 
- price_boxplot + coord_flip()
-
-#Log Precio
- 
- price_boxplot_ln <-  ggplot() +
-                     geom_boxplot(aes(y = train$ln_price), fill = "#BFBFBF", alpha=0.5) +
-                     labs(y = "Precio de venta (log)", title = "Distribución de Precio (Log)") +
-                     scale_x_discrete() + scale_y_continuous(labels = label_dollar(prefix = "$")) + 
-                     theme_bw() +
-                     theme(axis.title = element_text(size = 10, color = "black", face = "bold"))
- 
- price_boxplot_ln  + coord_flip()
- 
-#Precio
- 
- price_histogram <-   ggplot(data = train, mapping = aes(x = price))  + 
-                      geom_histogram(bins = 15, position = 'identity', color="#424242", fill="#BFBFBF") +
-                      labs(title = 'Distribución de los precios de venta',
-                      x = 'Precio de Venta',
-                      y = 'Frecuencia') + 
-                      scale_x_continuous(labels = label_number()) +
-                      theme_bw()
- 
- price_histogram
- 
-#Log Precio
- 
- price_histogram_ln <-  ggplot(data = train, mapping = aes(x = ln_price))  + 
-                       geom_histogram(bins = 15, position = 'identity', color="#424242", fill="#BFBFBF") +
-                       labs(title = 'Distribución de los precios de venta (Log)',
-                       x = 'Precio de Venta (log)',
-                       y = 'Frecuencia') + 
-                       scale_x_continuous(labels = label_number()) +
-                       theme_bw()
- 
- price_histogram_ln
 
 #Visualizar cuales de estos inmuebles son casas y cuales apartamentos
  
@@ -222,7 +164,7 @@
                   theme_bw() +
                   theme(axis.title = element_text(size = 10, color = "black", face = "bold"))
  
- price_boxplot
+ price_boxplot + coord_flip()
 
 #Log Precio
  
@@ -233,7 +175,7 @@
                    theme_bw() +
                    theme(axis.title = element_text(size = 10, color = "black", face = "bold"))
  
- price_boxplot_ln
+ price_boxplot_ln + coord_flip()
  
 #Precio
  
@@ -281,9 +223,3 @@
    dim(bigrams)
    dim(bigrams2)
    
-   
-<<<<<<< Updated upstream
-  
-=======
-   
->>>>>>> Stashed changes
