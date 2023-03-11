@@ -36,25 +36,42 @@
  glimpse(train) #Las dos BD de Train y Test tienen las mismas variables
  
  train <- train %>% mutate(latp=lat,longp=lon, ln_price = log(price))
- train <- st_as_sf(train,coords=c('longp','latp'),crs = 4686)
-
+ train <- sf::st_as_sf(train,coords=c('longp','latp'),crs = 4686)
+ class(train)
+ head(train)
+ 
+ map1<-leaflet() %>%
+   addTiles() %>%
+   addCircles(lng = train$lon, 
+              lat = train$lat)
+ map1
+ 
+ ggplot() +
+   geom_sf(data=train)+
+   theme_bw()
+ 
 #Limpieza de la BD ----
  
  sapply(train, function(x) sum(is.na(x))) %>% as.data.frame()  #Revisamos los NA de las variables
  
  filtro <- is.na(train$surface_total) #Transformamos los NA a ceros
+ sum(filtro)
  train$surface_total[filtro] <- 0
  
  filtro <- is.na(train$surface_covered) #Trasnsformamos los NA a ceros
+ sum(filtro)
  train$surface_covered[filtro] <- 0
  
  filtro <- is.na(train$bedrooms) #Trasnsformamos los NA a ceros #REVISAR
+ sum(filtro)
  train$bedrooms[filtro] <- 0
  
  filtro <- is.na(train$bathrooms) #Trasnsformamos los NA a ceros #REVISAR
+ sum(filtro)
  train$bathrooms[filtro] <- 0
  
  filtro <- is.na(train$rooms) #Trasnsformamos los NA a ceros #REVISAR
+ sum(filtro)
  train$rooms[filtro] <- 0
 
  filtro <- is.na(train$lat) | is.na(train$lon) #| is.na(train$rooms) | is.na(train$bathrooms) #| is.na(train$surface_total) | is.na(train$surface_covered) 
@@ -164,4 +181,15 @@
  
  price_histogram_ln
 
-       
+#Visualizar cuales de estos inmuebles son casas y cuales apartamentos
+ 
+ color <- rep(NA,nrow(train))
+ color[train$property_type == "Casa"] <- "#ffff3f"
+   color[train$property_type == "Apartamento"] <- "#007f5f"
+     
+   
+   leaflet() %>%
+     addTiles() %>%
+     addCircles(lng = train$lon,
+                lat = train$lat,
+                col = color)
