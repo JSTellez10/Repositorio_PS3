@@ -12,6 +12,8 @@
 #
 #------------------------------------------------------------------------------#
 
+  rm(list=ls())
+
   library(pacman) 
   
   setwd("C:/Users/User/Documents/Big_Data/BD_Taller 3") 
@@ -24,7 +26,7 @@
   p_load(tidyverse, rio, sf, dplyr, osmdata, leaflet, scales, stargazer,rstudioapi, 
          rio, plotly, modeldata, rgeos, tmaptools, IRdisplay, spatialsample, geojsonio)
   
-   rm(list=ls())
+  
 
  
 #Lectura de los datos de Train ----
