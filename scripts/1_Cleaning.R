@@ -211,9 +211,8 @@
 #Matriz de Correlaciones
  
  stargazer(cor(round(estadisticas, 4)), title="Tabla de Correlaciones", type='text')
-<<<<<<< HEAD
  stargazer(cor(round(estadisticas, 4)), title="Tabla de Correlaciones", type='latex')
-=======
+
 
 #Distribuciones de los precios
  
