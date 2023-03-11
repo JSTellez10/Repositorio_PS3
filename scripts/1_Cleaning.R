@@ -190,36 +190,66 @@
  price_histogram
  
 
-   ###############################################################################
-  
-   #Vamos a sacar los predictores a partir de la descripción de las propiedades
-   p_load(tm, tidytext) 
+ ###############################################################################
+ 
+ #Vamos a sacar los predictores a partir de la descripción de las propiedades
+ p_load(tm, tidytext) 
+ view(train)
+ 
+ id<-train$property_id
+ descripcion <- train$description
+ titulo <- train$title
+ 
+ df<-data.frame(id,descripcion,titulo)
+ view(df)
+ 
+ #Ponemos todo en minúscula, quitamos espacios en blanco sobrante y signos de puntuación
+ 
+ train$descripcion <- removePunctuation(train$description)
+ train$descripcion <- tolower(train$description)
+ train$descripcion <- stripWhitespace(train$description)
+ 
+ # Generar bigramas
+ 
+ bigrams <- train %>% ungroup() %>%
+   unnest_tokens(bigram, descripcion, token = "ngrams", n = 2)
+ head(bigrams)
+ 
+ # Eliminar los bigramas que no contengan información de mts
+ 
+ descripcion_keep <- c("mts2", "m", "mts", "metros", "m2", "mt2")
+ bigrams_keep <- data.frame(word2 = descripcion_keep)
+ 
+ bigrams2 <- bigrams %>% ungroup() %>%
+   separate(bigram, c("word1", "word2"), sep = " ") %>%
+   semi_join(bigrams_keep, by = "word2") %>%
+   unite(bigram, word1, sep = " ")
+ 
+ head(bigrams2)
+ 
+ #se borra la plabra mts2
+ train2 <- bigrams2 %>% select(-c("word2"))
+ colnames(train2)
+ 
+ view(train2)
+ 
+ 
+ train2 <- transform(train2,bigram = as.numeric(bigram))
+ view(train2)
+ 
+ sapply(train2, function(x) sum(is.na(x))) %>% as.data.frame()  #Revisamos los NA de las variables
+ 
+ filtro <- is.na(train2$bigram) #Transformamos los NA a ceros
+ sum(filtro)
+ train2$bigram[filtro] <- 0
+ 
+ train2 <- train2 %>% 
+   rename(mts2=bigram)
    
-   descripcion <- train$description
-   titulo <- train$title
-
-   #Ponemos todo en minúscula, quitamos espacios en blanco sobrante y signos de puntuación
+   # Mantener informacion de parqueaderos / garajes
    
-   descripcion <- removePunctuation(descripcion)
-   descripcion <- tolower(descripcion)
-   descripcion <- stripWhitespace(descripcion)
-   
-   # Generar bigramas
-   
-   bigrams <- as.data.frame(descripcion) %>%
-     unnest_tokens(bigram, descripcion, token = "ngrams", n = 2)
-   
-   
-   # Eliminar los bigramas que no contengan información de mts
-   
-   descripcion_keep <- c("mts2", "m", "mts", "metros", "m2", "mt2")
-   bigrams_keep <- data.frame(word2 = descripcion_keep)
-   
-   bigrams2 <- bigrams %>%
-     separate(bigram, c("word1", "word2"), sep = " ") %>%
-     semi_join(bigrams_keep, by = "word2") %>%
-     unite(bigram, word1, word2, sep = " ")
-   
-   dim(bigrams)
-   dim(bigrams2)
-   
+   library(tokenizers)
+   train2$parqueadero <- tokenize_words(train2$description)
+   descripcion_keep2 <- c("parqueadero?", "garaje?")
+   train2$parqueadero <- as.logical(grepl(paste(descripcion_keep2, collapse = "|"), train2$parqueadero))
+   train2$parqueadero <- as.integer(as.logical(train2$parqueadero))
