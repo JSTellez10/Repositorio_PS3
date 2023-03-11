@@ -301,9 +301,4 @@
    dim(bigrams2)
    
    
-   
-<<<<<<< HEAD
-   
-=======
->>>>>>> 5daeb334b6479439e8dd1f579b86e77aab9cd6b4
->>>>>>> e732ed90e5584e4d7ed7d0324c2d132e117ca270
+  
