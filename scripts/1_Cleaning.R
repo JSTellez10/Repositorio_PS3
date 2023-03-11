@@ -211,4 +211,92 @@
 #Matriz de Correlaciones
  
  stargazer(cor(round(estadisticas, 4)), title="Tabla de Correlaciones", type='text')
+<<<<<<< HEAD
  stargazer(cor(round(estadisticas, 4)), title="Tabla de Correlaciones", type='latex')
+=======
+
+#Distribuciones de los precios
+ 
+ price_boxplot <- ggplot() +
+                  geom_boxplot(aes(y = train$price), fill = "#3FA0FF", alpha=0.5) +
+                  labs(y = "Precio de venta", title = "Distribución de Precio") +
+                  scale_x_discrete() + scale_y_continuous(labels = label_dollar(prefix = "$")) + 
+                  theme_bw() +
+                  theme(axis.title = element_text(size = 10, color = "black", face = "bold"))
+ 
+ price_boxplot
+
+#Log Precio
+ 
+ price_boxplot_ln <-  ggplot() +
+                   geom_boxplot(aes(y = train$ln_price), fill = "#3FA0FF", alpha=0.5) +
+                   labs(y = "Precio de venta (log)", title = "Distribución de Precio (Log)") +
+                   scale_x_discrete() + scale_y_continuous(labels = label_dollar(prefix = "$")) + 
+                   theme_bw() +
+                   theme(axis.title = element_text(size = 10, color = "black", face = "bold"))
+ 
+ price_boxplot_ln
+ 
+#Precio
+ 
+ price_histogram <-   ggplot(data = train, mapping = aes(x = price))  + 
+                      geom_histogram(bins = 15, position = 'identity', color="#424242", fill="#BFBFBF") +
+                      labs(title = 'Distribución de los precios de venta',
+                      x = 'Precio de Venta',
+                      y = 'Frecuencia') + 
+                      scale_x_continuous(labels = label_number()) +
+                      theme_bw()
+ 
+ price_histogram
+ 
+
+#Visualizar cuales de estos inmuebles son casas y cuales apartamentos
+ 
+ color <- rep(NA,nrow(train))
+ color[train$property_type == "Casa"] <- "#ffff3f"
+   color[train$property_type == "Apartamento"] <- "#007f5f"
+     
+   
+   leaflet() %>%
+     addTiles() %>%
+     addCircles(lng = train$lon,
+                lat = train$lat,
+                col = color)
+   
+   
+   ###############################################################################
+  
+   #Vamos a sacar los predictores a partir de la descripción de las propiedades
+   p_load(tm, tidytext) 
+   
+   descripcion <- train$description
+   titulo <- train$title
+.
+   #Ponemos todo en minúscula, quitamos espacios en blanco sobrante y signos de puntuación
+   
+   descripcion <- removePunctuation(descripcion)
+   descripcion <- tolower(descripcion)
+   descripcion <- stripWhitespace(descripcion)
+   
+   # Generar bigramas
+   
+   bigrams <- as.data.frame(descripcion) %>%
+     unnest_tokens(bigram, descripcion, token = "ngrams", n = 2)
+   
+   
+   # Eliminar los bigramas que no contengan información de mts
+   
+   descripcion_keep <- c("mts2", "m", "mts", "metros", "m2", "mt2")
+   bigrams_keep <- data.frame(word2 = descripcion_keep)
+   
+   bigrams2 <- bigrams %>%
+     separate(bigram, c("word1", "word2"), sep = " ") %>%
+     semi_join(bigrams_keep, by = "word2") %>%
+     unite(bigram, word1, word2, sep = " ")
+   
+   dim(bigrams)
+   dim(bigrams2)
+   
+   
+   
+>>>>>>> 5daeb334b6479439e8dd1f579b86e77aab9cd6b4
