@@ -169,17 +169,6 @@
  
  price_histogram
  
-#Log Precio
- 
- price_histogram_ln <-  ggplot(data = train, mapping = aes(x = ln_price))  + 
-                       geom_histogram(bins = 15, position = 'identity', color="#424242", fill="#BFBFBF") +
-                       labs(title = 'Distribución de los precios de venta (Log)',
-                       x = 'Precio de Venta (log)',
-                       y = 'Frecuencia') + 
-                       scale_x_continuous(labels = label_number()) +
-                       theme_bw()
- 
- price_histogram_ln
 
 #Visualizar cuales de estos inmuebles son casas y cuales apartamentos
  
@@ -197,40 +186,19 @@
    
    ###############################################################################
   
-   #Vamos a sacar los predictores provenientes del título o descripción de las propiedades
+   #Vamos a sacar los predictores a partir de la descripción de las propiedades
    p_load(tm, tidytext) 
    
    descripcion <- train$description
    titulo <- train$title
-   
-   #Vamoshacer es un preprocesamiento para estandarizar los datos.
-   #Ponemos todo en minúscula, quitamos espacios en blanco sobrante y signos de puntuación.
+.
+   #Ponemos todo en minúscula, quitamos espacios en blanco sobrante y signos de puntuación
    
    descripcion <- removePunctuation(descripcion)
    descripcion <- tolower(descripcion)
    descripcion <- stripWhitespace(descripcion)
    
-   #Tokenizamos
-   
-   descripcion_tidy <- as.data.frame(descripcion) %>% unnest_tokens( "word", descripcion)
-   
-   head(stopwords('spanish'))
-   
-   descripcion_tidy <- descripcion_tidy  %>% 
-     anti_join(tibble(word =stopwords("spanish")))
-   
-   #descripcion_tidy$radical <- stemDocument( descripcion_tidy$word, language="spanish")
-   #descripcion_tidy %>% head()
-   
-   
-   # Definimos lo que queremos mantener
-   #descripcion_keep <- c("metros", "m", "mts")
-   
-   # Eliminamos los nuevos stop words
-   #comentarios_tidy <- anti_join(comentarios_tidy, data.frame(word = custom_stopwords))
-   
    # Generar bigramas
-   
    
    bigrams <- as.data.frame(descripcion) %>%
      unnest_tokens(bigram, descripcion, token = "ngrams", n = 2)
