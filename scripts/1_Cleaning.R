@@ -212,10 +212,6 @@
  
  stargazer(cor(round(estadisticas, 4)), title="Tabla de Correlaciones", type='text')
  stargazer(cor(round(estadisticas, 4)), title="Tabla de Correlaciones", type='latex')
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 
 #Distribuciones de los precios
  
