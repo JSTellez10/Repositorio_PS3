@@ -169,17 +169,6 @@
  
  price_histogram
  
-#Log Precio
- 
- price_histogram_ln <-  ggplot(data = train, mapping = aes(x = ln_price))  + 
-                       geom_histogram(bins = 15, position = 'identity', color="#424242", fill="#BFBFBF") +
-                       labs(title = 'Distribución de los precios de venta (Log)',
-                       x = 'Precio de Venta (log)',
-                       y = 'Frecuencia') + 
-                       scale_x_continuous(labels = label_number()) +
-                       theme_bw()
- 
- price_histogram_ln
 
 #Visualizar cuales de estos inmuebles son casas y cuales apartamentos
  
@@ -193,3 +182,40 @@
      addCircles(lng = train$lon,
                 lat = train$lat,
                 col = color)
+   
+   
+   ###############################################################################
+  
+   #Vamos a sacar los predictores a partir de la descripción de las propiedades
+   p_load(tm, tidytext) 
+   
+   descripcion <- train$description
+   titulo <- train$title
+.
+   #Ponemos todo en minúscula, quitamos espacios en blanco sobrante y signos de puntuación
+   
+   descripcion <- removePunctuation(descripcion)
+   descripcion <- tolower(descripcion)
+   descripcion <- stripWhitespace(descripcion)
+   
+   # Generar bigramas
+   
+   bigrams <- as.data.frame(descripcion) %>%
+     unnest_tokens(bigram, descripcion, token = "ngrams", n = 2)
+   
+   
+   # Eliminar los bigramas que no contengan información de mts
+   
+   descripcion_keep <- c("mts2", "m", "mts", "metros", "m2", "mt2")
+   bigrams_keep <- data.frame(word2 = descripcion_keep)
+   
+   bigrams2 <- bigrams %>%
+     separate(bigram, c("word1", "word2"), sep = " ") %>%
+     semi_join(bigrams_keep, by = "word2") %>%
+     unite(bigram, word1, word2, sep = " ")
+   
+   dim(bigrams)
+   dim(bigrams2)
+   
+   
+   
