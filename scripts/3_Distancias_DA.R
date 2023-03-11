@@ -132,3 +132,20 @@ head(train_sf)
   train$distancia_tm <- dist_min
   train_sf$distancia_tm <- dist_min
   
+  
+  #Tabla de Estadísticas Descriptivas - Distancias
+  
+  estadisticas2 <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms,
+                                   distancia_parque, distancia_museo, distancia_ips, distancia_ese, 
+                                   distancia_colegios, distancia_cai, distancia_best, distancia_centrof, 
+                                   distancia_cuadrantes, distancia_buses, distancia_tm) %>% as.data.frame()
+  
+  estadisticas2 <- estadisticas2 %>% select(-geometry) %>% as.data.frame()
+  stargazer(round(estadisticas2), digits = 2, title="Tabla de Estadísticas descriptivas", type='text')
+  stargazer(round(estadisticas2), digits = 2, title="Tabla de Estadísticas descriptivas", type='latex')
+  
+  #Matriz de Correlaciones
+  
+  stargazer(cor(round(estadisticas2, 4)), title="Tabla de Correlaciones", type='text')
+  stargazer(cor(round(estadisticas2, 4)), title="Tabla de Correlaciones", type='latex')
+  
