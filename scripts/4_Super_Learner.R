@@ -15,16 +15,7 @@
   train_7 <- train[ inTrain,]
   test_3  <- train[-inTrain,]
   
-  colnames(train)
-  
-  YSL <-train_7$price
-  
-  XSL <- train_7 %>% select(rooms,bedrooms,bathrooms,property_type,area_maxima,distancia_parque,distancia_museo,distancia_ips, 
-                              distancia_ese, distancia_colegios, distancia_cai, distancia_best, distancia_centrof, distancia_cuadrantes, 
-                              distancia_buses, distancia_tm, total_eventos_2022) %>% as.data.frame()
-  
-  XSL <- XSL %>% select(-geometry) %>% as.data.frame()
-  
+
 #Regresiones Simples----
 
   glimpse(train)
@@ -80,20 +71,22 @@
   
 #Elastic Net ----
 
-  sapply(train_7, function(x) sum(is.na(x))) %>% as.data.frame()  #Revisamos los NA de las variables
-  
   set.seed(10101)
   fitControl <- trainControl(method = "cv", number = 10)
 
-  EN <-  train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
-                 distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
+  EN <-  train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+distancia_parque+distancia_museo+
+                 distancia_ips+distancia_ese+distancia_colegios+
                  distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
-                 total_eventos_2022+I(total_eventos_2022^2)+I(distancia_cai^2)+(distancia_colegios^2), data = train_7, 
+                 total_eventos_2022+I(total_eventos_2022^2)+
+                 (distancia_colegios^2), data = train_7, 
                  method = 'glmnet', 
                  trControl = fitControl,
                  tuneGrid = expand.grid(alpha = 0.5,lambda = seq(0.001,0.02,by = 0.001)),
                  preProcess = c("center", "scale")) 
-    
+  
+  coef_EN <- coef(EN$finalModel, EN$bestTune$lambda)
+  coef_EN
+  
   test_3$y_hat3 <- predict(EN, newdata = test_3)
   MAE_model3 <- with(test_3, mean(abs(price - y_hat3))) #Calculating the MSE
   MAE_model3
@@ -108,6 +101,9 @@
                tuneGrid = expand.grid(alpha = seq(0,1,by = 0.1),lambda = seq(0.001,0.02,by = 0.001)),
                preProcess = c("center", "scale")) 
   
+  coef_EN2 <- coef(EN2$finalModel, EN2$bestTune$lambda)
+  coef_EN2
+  
   test_3$y_hat4 <- predict(EN2, newdata = test_3)
   MAE_model4 <- with(test_3, mean(abs(price - y_hat4))) #Calculating the MSE
   MAE_model4
@@ -120,6 +116,9 @@
                 trControl = fitControl,
                 tuneGrid = expand.grid(alpha = seq(0,1,by = 0.1),lambda = seq(0.001,0.02,by = 0.001)),
                 preProcess = c("center", "scale")) 
+  
+  coef_EN3 <- coef(EN3$finalModel, EN3$bestTune$lambda)
+  coef_EN3
   
   test_3$y_hat5 <- predict(EN3, newdata = test_3)
   MAE_model5 <- with(test_3, mean(abs(price - y_hat5))) #Calculating the MSE
@@ -135,6 +134,9 @@
                 tuneGrid = expand.grid(alpha = seq(0,1,by = 0.1),lambda = seq(0.001,0.02,by = 0.001)),
                 preProcess = c("center", "scale")) 
   
+  coef_EN4 <- coef(EN4$finalModel, EN4$bestTune$lambda)
+  coef_EN4
+  
   test_3$y_hat6 <- predict(EN4, newdata = test_3)
   MAE_model6 <- with(test_3, mean(abs(price - y_hat6))) #Calculating the MSE
   MAE_model6
@@ -142,6 +144,18 @@
   
 #Super Learner----
 
+  colnames(train_7)
+  
+  YSL <-train_7$price
+  
+  XSL <- train_7 %>% select(rooms,bedrooms,bathrooms,property_type,distancia_parque, 
+                            distancia_ese, distancia_colegios, distancia_cai, distancia_best, 
+                            distancia_cuadrantes, distancia_buses, total_eventos_2022) %>% as.data.frame()
+  
+  XSL <- XSL %>% select(-geometry) %>% as.data.frame()
+  
+  sapply(train_7, function(x) sum(is.na(x))) %>% as.data.frame()  #Revisamos los NA de las variables
+  
   sl.lib <- c("SL.randomForest", "SL.lm") #lista de los algoritmos a correr
   
   #Fit using the SuperLearner package
