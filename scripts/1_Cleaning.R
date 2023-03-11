@@ -194,7 +194,6 @@
  
  #Vamos a sacar los metros cuadrados a partir de la descripción de las propiedades
  p_load(tm, tidytext) 
- view(train)
  
  id<-train$property_id
  descripcion <- train$description
