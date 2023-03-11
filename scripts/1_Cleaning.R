@@ -191,12 +191,15 @@
    
    descripcion <- train$description
    titulo <- train$title
-.
+
    #Ponemos todo en minúscula, quitamos espacios en blanco sobrante y signos de puntuación
    
    descripcion <- removePunctuation(descripcion)
    descripcion <- tolower(descripcion)
    descripcion <- stripWhitespace(descripcion)
+   
+   descripcion2 <- tibble(n_descripcion = 1:38644, text_descripcion = descripcion)
+   descripcion2
    
    # Generar bigramas
    
@@ -216,6 +219,7 @@
    
    dim(bigrams)
    dim(bigrams2)
+   
    
    
    
