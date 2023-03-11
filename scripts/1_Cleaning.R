@@ -253,3 +253,9 @@
    descripcion_keep2 <- c("parqueadero?", "garaje?")
    train2$parqueadero <- as.logical(grepl(paste(descripcion_keep2, collapse = "|"), train2$parqueadero))
    train2$parqueadero <- as.integer(as.logical(train2$parqueadero))
+   
+   train_area <- train2 %>% select(property_id, mts2, parqueadero) %>% as.data.frame
+   train_area <- train2 %>% select(-geometry) %>% as.data.frame
+   train <- st_join(train, train_area)
+   
+   
