@@ -249,20 +249,6 @@
  price_histogram
  
 
-#Visualizar cuales de estos inmuebles son casas y cuales apartamentos
- 
- color <- rep(NA,nrow(train))
- color[train$property_type == "Casa"] <- "#ffff3f"
-   color[train$property_type == "Apartamento"] <- "#007f5f"
-     
-   
-   leaflet() %>%
-     addTiles() %>%
-     addCircles(lng = train$lon,
-                lat = train$lat,
-                col = color)
-   
-   
    ###############################################################################
   
    #Vamos a sacar los predictores a partir de la descripción de las propiedades
