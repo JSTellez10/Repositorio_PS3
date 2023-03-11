@@ -12,6 +12,12 @@
 #
 #------------------------------------------------------------------------------#
 
+#Importante para ejecutar el código----
+
+  #Para ejecutar el código es necesario descargar todas las carpetas que se encuentran en el siguiente repositorio:
+  #https://github.com/AndresMPL/Repositorio_PS3/tree/main/datasets/localidades
+  #Guardar estas carpetas en una carpeta llamada "datos" y fijar el directorio de trabajo en esta última carpeta contenedora
+
   library(pacman) 
   
   setwd("C:/Users/User/Documents/Big_Data/BD_Taller 3") 
@@ -40,16 +46,113 @@
  class(train)
  head(train)
  
- map1<-leaflet() %>%
-   addTiles() %>%
-   addCircles(lng = train$lon, 
-              lat = train$lat)
+ 
+#Mapa Train----
+#Mapa de distribución de los datos de entrenamiento
+ 
+ bogota_polig <- getbb(place_name = "Bogotá", 
+                       featuretype = "boundary:administrative", 
+                       format_out = "sf_polygon") %>% .$multipolygon
+ 
+ centroide_bta <- gCentroid(as(bogota_polig$geometry, "Spatial"), byid = T)
+ 
+ localidades <- st_read("datos/localidades")
+ localidades <- localidades %>% select(LocNombre, geometry)
+ train <- st_join(train, localidades)
+ train_est <- train %>% select(LocNombre) %>% as.data.frame()
+ train_est <- train_est %>% select(-geometry) %>% as.data.frame()
+ train_est <- table(train_est) %>% as.data.frame()
+ localidades <- inner_join(localidades, train_est, by = "LocNombre")
+ localidades <- st_transform(localidades,4326)
+
+ pal <- colorNumeric(palette = c("#FF6600", "#0033FF"), domain = c(train$price), reverse = TRUE)
+ 
+ map1 <- leaflet() %>%
+          addProviderTiles(providers$Stamen.Toner) %>%
+          addPolygons(data=localidades, opacity = 0.6, fill = FALSE, color ="#D08151", weight = 3) %>%
+          addCircleMarkers(radius = 1, lng = train$lon, lat = train$lat, weight = 3, color = pal(train$price), fill = pal(train$price)) %>%
+          setView(lng = centroide_bta$x, lat = centroide_bta$y, zoom = 11) %>% 
+          addLegend("bottomright", pal = pal, values = train$price,
+             title = "Precios",
+             labFormat = labelFormat(prefix = "$"),
+             opacity = 1)
+   
  map1
  
- ggplot() +
-   geom_sf(data=train)+
-   theme_bw()
+#Tabla de Estadísticas Descriptivas - Antes de limpieza
  
+ summary(train$price) %>%
+         as.matrix() %>%
+         as.data.frame() %>%
+         mutate(V1 = scales::dollar(V1))
+ 
+ estadisticas <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms) %>% as.data.frame()
+ estadisticas <- estadisticas %>% select(-geometry) %>% as.data.frame()
+ stargazer(round(estadisticas), digits = 2, title="Tabla de Estadísticas descriptivas", type='text')
+ stargazer(round(estadisticas), digits = 2, title="Tabla de Estadísticas descriptivas", type='latex')
+ 
+ 
+#Distribuciones de los precios
+ 
+ price_boxplot <- ggplot() +
+                  geom_boxplot(aes(y = train$price), fill = "#BFBFBF", alpha=0.5) +
+                  labs(y = "Precio de venta", title = "Distribución de Precio") +
+                  scale_x_discrete() + scale_y_continuous(labels = label_dollar(prefix = "$")) + 
+                  theme_bw() +
+                  theme(axis.title = element_text(size = 10, color = "black", face = "bold"))
+ 
+ price_boxplot + coord_flip()
+
+#Log Precio
+ 
+ price_boxplot_ln <-  ggplot() +
+                     geom_boxplot(aes(y = train$ln_price), fill = "#BFBFBF", alpha=0.5) +
+                     labs(y = "Precio de venta (log)", title = "Distribución de Precio (Log)") +
+                     scale_x_discrete() + scale_y_continuous(labels = label_dollar(prefix = "$")) + 
+                     theme_bw() +
+                     theme(axis.title = element_text(size = 10, color = "black", face = "bold"))
+ 
+ price_boxplot_ln  + coord_flip()
+ 
+#Precio
+ 
+ price_histogram <-   ggplot(data = train, mapping = aes(x = price))  + 
+                      geom_histogram(bins = 15, position = 'identity', color="#424242", fill="#BFBFBF") +
+                      labs(title = 'Distribución de los precios de venta',
+                      x = 'Precio de Venta',
+                      y = 'Frecuencia') + 
+                      scale_x_continuous(labels = label_number()) +
+                      theme_bw()
+ 
+ price_histogram
+ 
+#Log Precio
+ 
+ price_histogram_ln <-  ggplot(data = train, mapping = aes(x = ln_price))  + 
+                       geom_histogram(bins = 15, position = 'identity', color="#424242", fill="#BFBFBF") +
+                       labs(title = 'Distribución de los precios de venta (Log)',
+                       x = 'Precio de Venta (log)',
+                       y = 'Frecuencia') + 
+                       scale_x_continuous(labels = label_number()) +
+                       theme_bw()
+ 
+ price_histogram_ln
+
+#Visualizar cuales de estos inmuebles son casas y cuales apartamentos
+ 
+ color <- rep(NA,nrow(train))
+ color[train$property_type == "Casa"] <- "#FFB900"
+   color[train$property_type == "Apartamento"] <- "#19AF00"
+   
+   leaflet() %>%
+     addProviderTiles(providers$Stamen.Toner) %>%
+     addPolygons(data=localidades, opacity = 0.5, fill = FALSE, color ="#003CFF", weight = 2.5) %>% 
+     addCircles(lng = train$lon, lat = train$lat, col = color, weight = 2) %>% 
+     setView(lng = centroide_bta$x, lat = centroide_bta$y, zoom = 11) %>% 
+     addLegend("bottomright", labels = c("Apartamentos","Casas"), colors = c("#19AF00","#FFB900"),
+               title = "Tipos de inmuebles",
+               opacity = 1)
+
 #Limpieza de la BD ----
  
  sapply(train, function(x) sum(is.na(x))) %>% as.data.frame()  #Revisamos los NA de las variables
@@ -98,98 +201,14 @@
  glimpse(train)
  
  
-#Mapa Train ----
-
- chapinero <- getbb(place_name = "UPZ Chapinero, Bogotá",
-                    featuretype = "boundary:administrative",
-                    format_out = "sf_polygon") %>% .$multipolygon
- 
- bogota_polig <- getbb(place_name = "Bogotá", 
-                       featuretype = "boundary:administrative", 
-                       format_out = "sf_polygon") %>% .$multipolygon
- 
- #Aquí vemos los puntos sobre los cuales queremos predecir su precio de venta
- 
- leaflet() %>%
-           addTiles() %>%
-           addPolygons(data=bogota_polig, color = "#5CACEE", opacity = 0.8, weight = 0.8) %>%
-           addCircles(data=train, radius = 0.1, color = "#00008B", opacity = 0.5) %>%
-           addPolygons(data=chapinero, color = "#EE3B3B", opacity = 0.5)
-
- 
-#Descripción y Estadísticas----
-
- summary(train$price) %>%
-                     as.matrix() %>%
-                     as.data.frame() %>%
-                     mutate(V1 = scales::dollar(V1))
- 
-#Tabla de Estadísticas Descriptivas
+#Tabla de Estadísticas Descriptivas - Después de limpieza
  
  estadisticas <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms) %>% as.data.frame()
  estadisticas <- estadisticas %>% select(-geometry) %>% as.data.frame()
- stargazer(round(estadisticas, 3), title="Tabla de Estadísticas descriptivas", type='text')
- stargazer(round(estadisticas, 3), title="Tabla de Estadísticas descriptivas", type='latex')
+ stargazer(round(estadisticas), digits = 2, title="Tabla de Estadísticas descriptivas", type='text')
+ stargazer(round(estadisticas), digits = 2, title="Tabla de Estadísticas descriptivas", type='latex')
  
 #Matriz de Correlaciones
  
  stargazer(cor(round(estadisticas, 4)), title="Tabla de Correlaciones", type='text')
-
-#Distribuciones de los precios
- 
- price_boxplot <- ggplot() +
-                  geom_boxplot(aes(y = train$price), fill = "#3FA0FF", alpha=0.5) +
-                  labs(y = "Precio de venta", title = "Distribución de Precio") +
-                  scale_x_discrete() + scale_y_continuous(labels = label_dollar(prefix = "$")) + 
-                  theme_bw() +
-                  theme(axis.title = element_text(size = 10, color = "black", face = "bold"))
- 
- price_boxplot
-
-#Log Precio
- 
- price_boxplot_ln <-  ggplot() +
-                   geom_boxplot(aes(y = train$ln_price), fill = "#3FA0FF", alpha=0.5) +
-                   labs(y = "Precio de venta (log)", title = "Distribución de Precio (Log)") +
-                   scale_x_discrete() + scale_y_continuous(labels = label_dollar(prefix = "$")) + 
-                   theme_bw() +
-                   theme(axis.title = element_text(size = 10, color = "black", face = "bold"))
- 
- price_boxplot_ln
- 
-#Precio
- 
- price_histogram <-   ggplot(data = train, mapping = aes(x = price))  + 
-                      geom_histogram(bins = 15, position = 'identity', color="#424242", fill="#BFBFBF") +
-                      labs(title = 'Distribución de los precios de venta',
-                      x = 'Precio de Venta',
-                      y = 'Frecuencia') + 
-                      scale_x_continuous(labels = label_number()) +
-                      theme_bw()
- 
- price_histogram
- 
-#Log Precio
- 
- price_histogram_ln <-  ggplot(data = train, mapping = aes(x = ln_price))  + 
-                       geom_histogram(bins = 15, position = 'identity', color="#424242", fill="#BFBFBF") +
-                       labs(title = 'Distribución de los precios de venta (Log)',
-                       x = 'Precio de Venta (log)',
-                       y = 'Frecuencia') + 
-                       scale_x_continuous(labels = label_number()) +
-                       theme_bw()
- 
- price_histogram_ln
-
-#Visualizar cuales de estos inmuebles son casas y cuales apartamentos
- 
- color <- rep(NA,nrow(train))
- color[train$property_type == "Casa"] <- "#ffff3f"
-   color[train$property_type == "Apartamento"] <- "#007f5f"
-     
-   
-   leaflet() %>%
-     addTiles() %>%
-     addCircles(lng = train$lon,
-                lat = train$lat,
-                col = color)
+ stargazer(cor(round(estadisticas, 4)), title="Tabla de Correlaciones", type='latex')
