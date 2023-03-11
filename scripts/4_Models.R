@@ -177,8 +177,7 @@
 #Random forest----------------------------------------------------------
   
   tunegrid_rf <- expand.grid(mtry = c(3, 5, 10), 
-                             min.node.size = c(10, 30, 50,
-                                               70, 100),
+                             min.node.size = c(10, 30, 50, 70, 100),
                              splitrule = "variance")
   
   control_rf <- trainControl(method = "cv", number = 5)
