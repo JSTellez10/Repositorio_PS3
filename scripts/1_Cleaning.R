@@ -192,3 +192,61 @@
      addCircles(lng = train$lon,
                 lat = train$lat,
                 col = color)
+   
+   
+   ###############################################################################
+  
+   #Vamos a sacar los predictores provenientes del título o descripción de las propiedades
+   p_load(tm, tidytext) 
+   
+   descripcion <- train$description
+   titulo <- train$title
+   
+   #Vamoshacer es un preprocesamiento para estandarizar los datos.
+   #Ponemos todo en minúscula, quitamos espacios en blanco sobrante y signos de puntuación.
+   
+   descripcion <- removePunctuation(descripcion)
+   descripcion <- tolower(descripcion)
+   descripcion <- stripWhitespace(descripcion)
+   
+   #Tokenizamos
+   
+   descripcion_tidy <- as.data.frame(descripcion) %>% unnest_tokens( "word", descripcion)
+   
+   head(stopwords('spanish'))
+   
+   descripcion_tidy <- descripcion_tidy  %>% 
+     anti_join(tibble(word =stopwords("spanish")))
+   
+   #descripcion_tidy$radical <- stemDocument( descripcion_tidy$word, language="spanish")
+   #descripcion_tidy %>% head()
+   
+   
+   # Definimos lo que queremos mantener
+   #descripcion_keep <- c("metros", "m", "mts")
+   
+   # Eliminamos los nuevos stop words
+   #comentarios_tidy <- anti_join(comentarios_tidy, data.frame(word = custom_stopwords))
+   
+   # Generar bigramas
+   
+   
+   bigrams <- as.data.frame(descripcion) %>%
+     unnest_tokens(bigram, descripcion, token = "ngrams", n = 2)
+   
+   
+   # Eliminar los bigramas que no contengan información de mts
+   
+   descripcion_keep <- c("mts2", "m", "mts", "metros", "m2", "mt2")
+   bigrams_keep <- data.frame(word2 = descripcion_keep)
+   
+   bigrams2 <- bigrams %>%
+     separate(bigram, c("word1", "word2"), sep = " ") %>%
+     semi_join(bigrams_keep, by = "word2") %>%
+     unite(bigram, word1, word2, sep = " ")
+   
+   dim(bigrams)
+   dim(bigrams2)
+   
+   
+   
