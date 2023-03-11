@@ -139,7 +139,7 @@ test$distancia_tm <- dist_min
 
 #Predicciones para Kaggle----
 
-test$price <- predict(reg21, newdata = test)
+test$price <- predict(EN5, newdata = test)
 exportar <- test %>% select(property_id, price, -geometry) %>% as.data.frame()
 exportar <- exportar %>% select(property_id, price) %>% as.data.frame()
 write.csv(exportar, "submission.csv", row.names = FALSE)
