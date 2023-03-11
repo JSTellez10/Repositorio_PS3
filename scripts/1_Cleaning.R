@@ -180,4 +180,15 @@
  
  price_histogram_ln
 
-       
+#Visualizar cuales de estos inmuebles son casas y cuales apartamentos
+ 
+ color <- rep(NA,nrow(train))
+ color[train$property_type == "Casa"] <- "#ffff3f"
+   color[train$property_type == "Apartamento"] <- "#007f5f"
+     
+   
+   leaflet() %>%
+     addTiles() %>%
+     addCircles(lng = train$lon,
+                lat = train$lat,
+                col = color)
