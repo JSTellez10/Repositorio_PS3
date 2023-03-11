@@ -141,3 +141,25 @@
   MAE_model6 <- with(test_3, mean(abs(price - y_hat6))) #Calculating the MSE
   MAE_model6
 
+
+  set.seed(10101)
+  fitControl <- trainControl(method = "cv", number = 10)
+  
+  EN5 <-  train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
+                  distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
+                  distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
+                  total_eventos_2022+I(total_eventos_2022^2)+I(total_eventos_2022^3) + I(distancia_cai^2)+I(distancia_colegios^2)+
+                  I(distancia_parque*distancia_buses) + I(total_eventos_2022*distancia_cai) + I(distancia_tm*distancia_buses)+
+                  I(distancia_ips*distancia_ese) + I(distancia_parque^2),
+                data = train_7, 
+                method = 'glmnet', 
+                trControl = fitControl,
+                tuneGrid = expand.grid(alpha = seq(0,1,by = 0.1),lambda = seq(0.001,0.02,by = 0.001)),
+                preProcess = c("center", "scale")) 
+  
+  coef_EN5 <- coef(EN5$finalModel , EN5$bestTune$lambda)
+  coef_EN5
+  
+  test_3$y_hat7 <- predict(EN5, newdata = test_3)
+  MAE_model7 <- with(test_3, mean(abs(price - y_hat7))) #Calculating the MSE
+  MAE_model7
