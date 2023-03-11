@@ -35,8 +35,14 @@
  glimpse(train) #Las dos BD de Train y Test tienen las mismas variables
  
  train <- train %>% mutate(latp=lat,longp=lon, ln_price = log(price))
- train <- st_as_sf(train,coords=c('longp','latp'),crs = 4686)
-
+ train <- sf::st_as_sf(train,coords=c('longp','latp'),crs = 4686)
+ class(train)
+ head(train)
+ 
+ ggplot() +
+   geom_sf(data=train)+
+   theme_bw()
+ 
 #Limpieza de la BD ----
  
  sapply(train, function(x) sum(is.na(x))) %>% as.data.frame()  #Revisamos los NA de las variables
