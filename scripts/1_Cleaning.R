@@ -151,7 +151,7 @@
      setView(lng = centroide_bta$x, lat = centroide_bta$y, zoom = 11) %>% 
      addLegend("bottomright", labels = c("Apartamentos","Casas"), colors = c("#19AF00","#FFB900"),
                title = "Tipos de inmuebles",
-               opacity = 1)
+               opacity = 1) 
 
 #Limpieza de la BD ----
  
@@ -212,7 +212,10 @@
  
  stargazer(cor(round(estadisticas, 4)), title="Tabla de Correlaciones", type='text')
  stargazer(cor(round(estadisticas, 4)), title="Tabla de Correlaciones", type='latex')
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 
 #Distribuciones de los precios
  
@@ -283,4 +286,8 @@
    dim(bigrams2)
    
    
+<<<<<<< Updated upstream
   
+=======
+   
+>>>>>>> Stashed changes
