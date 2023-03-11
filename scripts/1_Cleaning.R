@@ -20,6 +20,7 @@
   #Guardarlas en una carpeta "datos" y fijar el directorio donde se encuentre esta carpeta
   
   #Cargamos las siguientes librerías verificando que no existen alertas por funciones duplicadas entre ellas
+  
   p_load(tidyverse, rio, sf, dplyr, osmdata, leaflet, scales, stargazer,rstudioapi, 
          rio, plotly, modeldata, rgeos, tmaptools, IRdisplay, spatialsample, geojsonio)
   
