@@ -140,7 +140,7 @@ head(train_sf)
   estadisticas2 <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms,
                                    distancia_parque, distancia_museo, distancia_ips, distancia_ese, 
                                    distancia_colegios, distancia_cai, distancia_best, distancia_centrof, 
-                                   distancia_cuadrantes, distancia_buses, distancia_tm, mts2, surface_total_imp,
+                                   distancia_cuadrantes, distancia_buses, distancia_tm, parqueaderos, mts2, surface_total_imp,
                                    surface_covered_imp, bedrooms_imp, bathrooms_imp, rooms_imp) %>% as.data.frame()
   
   estadisticas2 <- estadisticas2 %>% select(-geometry) %>% as.data.frame()
