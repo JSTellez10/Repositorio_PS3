@@ -98,6 +98,8 @@
 
   
   ##EN2----
+  
+  set.seed(10101)
   EN2 <-  train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
                   distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
                   distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
@@ -115,6 +117,7 @@
   MAE_model4
   
   ##EN3----
+  set.seed(10101)
   EN3 <-  train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
                   distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
                   distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
@@ -133,6 +136,7 @@
   
   
   ##EN4----
+  set.seed(10101)
   EN4 <-  train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
                   distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
                   distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
@@ -153,7 +157,8 @@
   set.seed(10101)
   fitControl <- trainControl(method = "cv", number = 10)
   
-  ##EN6----
+  ##EN5----
+  set.seed(10101)
   EN5 <-  train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
                   distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
                   distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
@@ -173,14 +178,15 @@
   MAE_model7 <- with(test_3, mean(abs(price - y_hat7))) #Calculating the MSE
   MAE_model7
   
-  ##EN7----
-  EN6 <-  train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
+  ##EN6----
+  set.seed(10101)
+  EN6 <-  train(price~property_type+area_maxima+
                   distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
                   distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
                   total_eventos_2022+I(total_eventos_2022^2)+I(total_eventos_2022^3) + I(distancia_cai^2)+I(distancia_colegios^2)+
                   I(distancia_parque*distancia_buses) + I(total_eventos_2022*distancia_cai) + I(distancia_tm*distancia_buses)+
-                  I(distancia_ips*distancia_ese) + I(distancia_parque^2)+mts2surface_total_imp+
-                  surface_covered_imp+bedrooms_imp+bathrooms_improoms_imp,
+                  I(distancia_ips*distancia_ese) + I(distancia_parque^2)+mts2+surface_total_imp+
+                  surface_covered_imp+bedrooms_imp+bathrooms_imp+rooms_imp,
                 data = train_7, 
                 method = 'glmnet', 
                 trControl = fitControl,
@@ -207,8 +213,8 @@
                        distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
                        total_eventos_2022+I(total_eventos_2022^2)+I(total_eventos_2022^3) + I(distancia_cai^2)+I(distancia_colegios^2)+
                        I(distancia_parque*distancia_buses) + I(total_eventos_2022*distancia_cai) + I(distancia_tm*distancia_buses)+
-                       I(distancia_ips*distancia_ese) + I(distancia_parque^2)+mts2surface_total_imp+
-                       surface_covered_imp+bedrooms_imp+bathrooms_improoms_imp,
+                       I(distancia_ips*distancia_ese) + I(distancia_parque^2)+mts2+surface_total_imp+
+                       surface_covered_imp+bedrooms_imp+bathrooms_imp+rooms_imp,
                        data = train_7, 
                        method = "ranger", 
                        trControl = control_rf,

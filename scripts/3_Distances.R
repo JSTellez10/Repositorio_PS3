@@ -140,7 +140,7 @@ head(train_sf)
   estadisticas2 <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms,
                                    distancia_parque, distancia_museo, distancia_ips, distancia_ese, 
                                    distancia_colegios, distancia_cai, distancia_best, distancia_centrof, 
-                                   distancia_cuadrantes, distancia_buses, distancia_tm, mts2, surface_total_imp,
+                                   distancia_cuadrantes, distancia_buses, distancia_tm, parqueadero, mts2, surface_total_imp,
                                    surface_covered_imp, bedrooms_imp, bathrooms_imp, rooms_imp) %>% as.data.frame()
   
   estadisticas2 <- estadisticas2 %>% select(-geometry) %>% as.data.frame()
@@ -148,7 +148,15 @@ head(train_sf)
   stargazer(round(estadisticas2), digits = 2, title="Tabla de Estadísticas descriptivas", type='latex')
   
   #Matriz de Correlaciones
-  
+ 
   stargazer(cor(round(estadisticas2, 4)), title="Tabla de Correlaciones", type='text')
   stargazer(cor(round(estadisticas2, 4)), title="Tabla de Correlaciones", type='latex')
+  
+  #Calculamos una matriz de correlaciones con unas variables seleccionadas
+  
+  estadisticas3 <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms) %>% as.data.frame()
+  
+  estadisticas3 <- estadisticas3 %>% select(-geometry) %>% as.data.frame()
+  stargazer(cor(round(estadisticas3, 4)), title="Tabla de Correlaciones", type='text')
+  stargazer(cor(round(estadisticas3, 4)), title="Tabla de Correlaciones", type='latex')
   

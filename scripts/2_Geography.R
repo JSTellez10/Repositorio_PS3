@@ -22,8 +22,7 @@
   centro_financiero <-st_read("datos/centro_financiero")
   delitos <-st_read("datos/delitos")
   cuadrantepolicia <-st_read("datos/cuadrantepolicia")
-  estratos <-st_read("datos/estrato")
-  
+
   #En "Delitos" generamos un total de casos para el año 2022
   #En el siguiente enlace se encuentra la descripción de las etiquetas de Delitos:
   #https://oaiee.scj.gov.co/agc/rest/services/Tematicos_Pub/CifrasSCJ/MapServer/layers
