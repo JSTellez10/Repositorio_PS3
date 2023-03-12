@@ -173,6 +173,26 @@
   MAE_model7 <- with(test_3, mean(abs(price - y_hat7))) #Calculating the MSE
   MAE_model7
   
+  ##EN7----
+  EN6 <-  train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
+                  distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
+                  distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
+                  total_eventos_2022+I(total_eventos_2022^2)+I(total_eventos_2022^3) + I(distancia_cai^2)+I(distancia_colegios^2)+
+                  I(distancia_parque*distancia_buses) + I(total_eventos_2022*distancia_cai) + I(distancia_tm*distancia_buses)+
+                  I(distancia_ips*distancia_ese) + I(distancia_parque^2)+mts2surface_total_imp+
+                  surface_covered_imp+bedrooms_imp+bathrooms_improoms_imp,
+                data = train_7, 
+                method = 'glmnet', 
+                trControl = fitControl,
+                tuneGrid = expand.grid(alpha = seq(0,1,by = 0.1),lambda = seq(0.001,0.02,by = 0.001)),
+                preProcess = c("center", "scale")) 
+  
+  coef_EN6 <- coef(EN6$finalModel , EN6$bestTune$lambda)
+  coef_EN6
+  
+  test_3$y_hat8 <- predict(EN6, newdata = test_3)
+  MAE_model8 <- with(test_3, mean(abs(price - y_hat8))) #Calculating the MSE
+  MAE_model8
   
 #Random forest----------------------------------------------------------
   
@@ -180,7 +200,7 @@
                              min.node.size = c(10, 30, 50, 70, 100),
                              splitrule = "variance")
   
-  control_rf <- trainControl(method = "cv", number = 5)
+  control_rf <- trainControl(method = "cv", number = 10)
   
   modelo_rf <- train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
                        distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
