@@ -135,10 +135,12 @@ head(train_sf)
   
   #Tabla de Estadísticas Descriptivas - Distancias
   
+  glimpse(train)
+  
   estadisticas2 <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms,
                                    distancia_parque, distancia_museo, distancia_ips, distancia_ese, 
                                    distancia_colegios, distancia_cai, distancia_best, distancia_centrof, 
-                                   distancia_cuadrantes, distancia_buses, distancia_tm) %>% as.data.frame()
+                                   distancia_cuadrantes, distancia_buses, distancia_tm, mts2) %>% as.data.frame()
   
   estadisticas2 <- estadisticas2 %>% select(-geometry) %>% as.data.frame()
   stargazer(round(estadisticas2), digits = 2, title="Tabla de Estadísticas descriptivas", type='text')
