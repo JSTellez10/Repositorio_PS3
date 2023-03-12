@@ -98,26 +98,28 @@
 #Limpieza de la BD ----
  
  sapply(train, function(x) sum(is.na(x))) %>% as.data.frame()  #Revisamos los NA de las variables
+   
+  #Imputamos las variables surface_total, surfaced_covered, bedrooms, bathrooms, rooms
  
- filtro <- is.na(train$surface_total) #Transformamos los NA a ceros
+ filtro <- is.na(train$surface_total) 
  sum(filtro)
- train$surface_total[filtro] <- 0
+ train$surface_total[filtro] <- mean(train$surface_total, na.rm = T)
  
- filtro <- is.na(train$surface_covered) #Trasnsformamos los NA a ceros
+ filtro <- is.na(train$surface_covered) 
  sum(filtro)
- train$surface_covered[filtro] <- 0
+ train$surface_covered[filtro] <- mean(train$surface_covered, na.rm = T)
  
- filtro <- is.na(train$bedrooms) #Trasnsformamos los NA a ceros #REVISAR
+ filtro <- is.na(train$bedrooms) 
  sum(filtro)
- train$bedrooms[filtro] <- 0
+ train$bedrooms[filtro] <- mean(train$bedrooms, na.rm = T)
  
- filtro <- is.na(train$bathrooms) #Trasnsformamos los NA a ceros #REVISAR
+ filtro <- is.na(train$bathrooms) 
  sum(filtro)
- train$bathrooms[filtro] <- 0
+ train$bathrooms[filtro] <- mean(train$bathrooms, na.rm = T)
  
- filtro <- is.na(train$rooms) #Trasnsformamos los NA a ceros #REVISAR
+ filtro <- is.na(train$rooms)
  sum(filtro)
- train$rooms[filtro] <- 0
+ train$rooms[filtro] <- mean(train$rooms, na.rm = T)
 
  filtro <- is.na(train$lat) | is.na(train$lon) #| is.na(train$rooms) | is.na(train$bathrooms) #| is.na(train$surface_total) | is.na(train$surface_covered) 
  train <- train[!filtro, ] #Filtramos los registros sin lat y lon
