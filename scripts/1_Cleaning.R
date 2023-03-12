@@ -239,7 +239,7 @@ leaflet() %>%
    as.data.frame() %>%
    mutate(V1 = scales::dollar(V1))
  
- estadisticas <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms, mts2) %>% as.data.frame()
+ estadisticas <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms, parqueadero) %>% as.data.frame()
  estadisticas <- estadisticas %>% select(-geometry) %>% as.data.frame()
  stargazer(round(estadisticas), digits = 2, title="Tabla de Estadísticas descriptivas", type='text')
  stargazer(round(estadisticas), digits = 2, title="Tabla de Estadísticas descriptivas", type='latex')
