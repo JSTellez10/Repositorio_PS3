@@ -185,7 +185,7 @@
                   distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
                   total_eventos_2022+I(total_eventos_2022^2)+I(total_eventos_2022^3) + I(distancia_cai^2)+I(distancia_colegios^2)+
                   I(distancia_parque*distancia_buses) + I(total_eventos_2022*distancia_cai) + I(distancia_tm*distancia_buses)+
-                  I(distancia_ips*distancia_ese) + I(distancia_parque^2)+mts2+surface_total_imp+
+                  I(distancia_ips*distancia_ese) + I(distancia_parque^2)+mts2+ I(mts2^2)+surface_total_imp+
                   surface_covered_imp+bedrooms_imp+bathrooms_imp+rooms_imp,
                 data = train_7, 
                 method = 'glmnet', 
@@ -238,4 +238,43 @@
   test_3$y_hat9 <- predict(modelo_rf, newdata = test_3)
   MAE_model9 <- with(test_3, mean(abs(price - y_hat9))) #Calculating the MSE
   MAE_model9
+  
+  
+#Random forest2----------------------------------------------------------
+  
+  tunegrid_rf <- expand.grid(mtry = c(3, 5, 10), 
+                             min.node.size = c(10, 30, 50, 70, 100),
+                             splitrule = "variance")
+  
+  control_rf <- trainControl(method = "cv", number = 10)
+  
+  modelo_rf2 <- train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
+                       distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
+                       distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
+                       total_eventos_2022+I(total_eventos_2022^2)+I(total_eventos_2022^3) + I(distancia_cai^2)+I(distancia_colegios^2)+
+                       I(distancia_parque*distancia_buses) + I(total_eventos_2022*distancia_cai) + I(distancia_tm*distancia_buses)+
+                       I(distancia_ips*distancia_ese) + I(distancia_parque^2),
+                     data = train_7, 
+                     method = "ranger", 
+                     trControl = control_rf,
+                     metric = 'RMSE', 
+                     tuneGrid = tunegrid_rf)
+  
+  Grilla_12 <- ggplot(modelo_rf2$results, 
+                     aes(x = min.node.size, y = RMSE, 
+                         color = as.factor(mtry))) +
+    geom_line() +
+    geom_point() +
+    labs(title = "Resultados del grid search",
+         x = "Mínima cantidad de observaciones por hoja",
+         y = "RMSE (Cross-Validation)") +
+    scale_color_discrete("Número de predictores seleccionados al azar") +
+    theme_bw() +
+    theme(legend.position = "bottom")
+  
+  Grilla_12
+  
+  test_3$y_hat10 <- predict(modelo_rf2, newdata = test_3)
+  MAE_model10 <- with(test_3, mean(abs(price - y_hat10))) #Calculating the MSE
+  MAE_model10
   
