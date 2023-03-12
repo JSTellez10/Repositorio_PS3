@@ -47,6 +47,15 @@
  stargazer(round(est_prev), digits = 4, title="Tabla de Estadísticas descriptivas", type='text')
  sapply(train, function(x) sum(is.na(x))) %>% as.data.frame()  #Revisamos los NA de las variables
  
+ #Buscamos informacion sobre si las propiedades tienen parqueaderos / garajes o no a partir de la descripción
+ 
+ library(tokenizers)
+ train$parqueadero <- tokenize_words(train$description)
+ descripcion_keep2 <- c("parqueadero?", "garaje?")
+ train$parqueadero <- as.logical(grepl(paste(descripcion_keep2, collapse = "|"), train$parqueadero))
+ train$parqueadero <- as.integer(as.logical(train$parqueadero))
+ 
+ 
  #Vamos a sacar los metros cuadrados a partir de la descripción de las propiedades
  p_load(tm, tidytext) 
  
@@ -96,19 +105,14 @@
  
  train2 <- train2 %>% rename(mts2=bigram)
  
- #Buscamos informacion sobre si las propiedades tienen parqueaderos / garajes o no a partir de la descripción
  
- library(tokenizers)
- train2$parqueadero <- tokenize_words(train2$description)
- descripcion_keep2 <- c("parqueadero?", "garaje?")
- train2$parqueadero <- as.logical(grepl(paste(descripcion_keep2, collapse = "|"), train2$parqueadero))
- train2$parqueadero <- as.integer(as.logical(train2$parqueadero))
- 
- train_area <- train2 %>% select(property_id, mts2, parqueadero)
+ train_area <- train2 %>% select(property_id, mts2)
  
  train_area2 <- train_area %>% group_by(property_id) %>% slice(1)
  
  train <- left_join(train, train_area2)
+ 
+ train <- train %>% select(-c("descripcion"))
  
  #Verificamos que los datos no hayan cambiado
      est_prev <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms) %>% as.data.frame()
@@ -235,7 +239,7 @@ leaflet() %>%
    as.data.frame() %>%
    mutate(V1 = scales::dollar(V1))
  
- estadisticas <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms) %>% as.data.frame()
+ estadisticas <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms, mts2) %>% as.data.frame()
  estadisticas <- estadisticas %>% select(-geometry) %>% as.data.frame()
  stargazer(round(estadisticas), digits = 2, title="Tabla de Estadísticas descriptivas", type='text')
  stargazer(round(estadisticas), digits = 2, title="Tabla de Estadísticas descriptivas", type='latex')
