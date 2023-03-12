@@ -154,8 +154,7 @@ head(train_sf)
   
   #Calculamos una matriz de correlaciones con unas variables seleccionadas
   
-  estadisticas3 <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms,
-                                    distancia_parque) %>% as.data.frame()
+  estadisticas3 <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms) %>% as.data.frame()
   
   estadisticas3 <- estadisticas3 %>% select(-geometry) %>% as.data.frame()
   stargazer(cor(round(estadisticas3, 4)), title="Tabla de Correlaciones", type='text')
