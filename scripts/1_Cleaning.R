@@ -106,8 +106,6 @@
  
  train_area <- train2 %>% select(property_id, mts2, parqueadero)
  
- seguridad-> train
- 
  train_area2 <- train_area %>% group_by(property_id) %>% slice(1)
  
  train <- left_join(train, train_area2)
