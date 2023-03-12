@@ -12,11 +12,15 @@
 #
 #------------------------------------------------------------------------------#
 
+<<<<<<< HEAD
 #Importante para ejecutar el código----
 
   #Para ejecutar el código es necesario descargar todas las carpetas que se encuentran en el siguiente repositorio:
   #https://github.com/AndresMPL/Repositorio_PS3/tree/main/datasets/localidades
   #Guardar estas carpetas en una carpeta llamada "datos" y fijar el directorio de trabajo en esta última carpeta contenedora
+=======
+  rm(list=ls())
+>>>>>>> 20cfe1f6c072d32ac881a337b72122ba4e5fbb37
 
   library(pacman) 
   
@@ -30,7 +34,7 @@
   p_load(tidyverse, rio, sf, dplyr, osmdata, leaflet, scales, stargazer,rstudioapi, 
          rio, plotly, modeldata, rgeos, tmaptools, IRdisplay, spatialsample, geojsonio)
   
-   rm(list=ls())
+  
 
  
 #Lectura de los datos de Train ----
@@ -322,5 +326,4 @@ leaflet() %>%
  
  price_histogram
  
-   
    
