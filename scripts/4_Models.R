@@ -5,7 +5,7 @@
 #
 #------------------------------------------------------------------------------#
 
-#Particiones Train-Test
+#Particiones Train-Test----
 
   p_load(SuperLearner, caret)
   set.seed(1011)
@@ -16,10 +16,11 @@
   test_3  <- train[-inTrain,]
   
 
-#Regresiones Simples----
+#Regresiones----
 
   glimpse(train)
   
+  ##Regresion 1----
   reg1 <- lm(price~distancia_parque+distancia_museo+distancia_ips+distancia_ese +distancia_colegios+distancia_cai+ 
                distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
                total_eventos_2022, data = train_7)
@@ -32,6 +33,7 @@
   MAE_model1
   
   
+  ##Regresion 2----
   reg2 <- lm(price~surface_total+surface_covered+rooms+bedrooms+bathrooms+property_type+area_maxima+
              distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
              distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
@@ -57,6 +59,7 @@
   MAE_model21
   
   
+  ##Regresion 3----
   reg22 <- lm(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
                 distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
                 distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
@@ -69,11 +72,13 @@
   MAE_model22 <- with(test_3, mean(abs(price - y_hat22))) #Calculating the MSE
   MAE_model22
   
+  
 #Elastic Net ----
 
   set.seed(10101)
   fitControl <- trainControl(method = "cv", number = 10)
 
+  ##EN1----
   EN <-  train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+distancia_parque+distancia_museo+
                  distancia_ips+distancia_ese+distancia_colegios+
                  distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
@@ -92,6 +97,7 @@
   MAE_model3
 
   
+  ##EN2----
   EN2 <-  train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
                   distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
                   distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
@@ -108,6 +114,7 @@
   MAE_model4 <- with(test_3, mean(abs(price - y_hat4))) #Calculating the MSE
   MAE_model4
   
+  ##EN3----
   EN3 <-  train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
                   distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
                   distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
@@ -125,6 +132,7 @@
   MAE_model5
   
   
+  ##EN4----
   EN4 <-  train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
                   distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
                   distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
@@ -141,3 +149,66 @@
   MAE_model6 <- with(test_3, mean(abs(price - y_hat6))) #Calculating the MSE
   MAE_model6
 
+
+  set.seed(10101)
+  fitControl <- trainControl(method = "cv", number = 10)
+  
+  ##EN6----
+  EN5 <-  train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
+                  distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
+                  distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
+                  total_eventos_2022+I(total_eventos_2022^2)+I(total_eventos_2022^3) + I(distancia_cai^2)+I(distancia_colegios^2)+
+                  I(distancia_parque*distancia_buses) + I(total_eventos_2022*distancia_cai) + I(distancia_tm*distancia_buses)+
+                  I(distancia_ips*distancia_ese) + I(distancia_parque^2),
+                data = train_7, 
+                method = 'glmnet', 
+                trControl = fitControl,
+                tuneGrid = expand.grid(alpha = seq(0,1,by = 0.1),lambda = seq(0.001,0.02,by = 0.001)),
+                preProcess = c("center", "scale")) 
+  
+  coef_EN5 <- coef(EN5$finalModel , EN5$bestTune$lambda)
+  coef_EN5
+  
+  test_3$y_hat7 <- predict(EN5, newdata = test_3)
+  MAE_model7 <- with(test_3, mean(abs(price - y_hat7))) #Calculating the MSE
+  MAE_model7
+  
+  
+#Random forest----------------------------------------------------------
+  
+  tunegrid_rf <- expand.grid(mtry = c(3, 5, 10), 
+                             min.node.size = c(10, 30, 50, 70, 100),
+                             splitrule = "variance")
+  
+  control_rf <- trainControl(method = "cv", number = 5)
+  
+  modelo_rf <- train(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
+                       distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
+                       distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
+                       total_eventos_2022+I(total_eventos_2022^2)+I(total_eventos_2022^3) + I(distancia_cai^2)+I(distancia_colegios^2)+
+                       I(distancia_parque*distancia_buses) + I(total_eventos_2022*distancia_cai) + I(distancia_tm*distancia_buses)+
+                       I(distancia_ips*distancia_ese) + I(distancia_parque^2),
+                       data = train_7, 
+                       method = "ranger", 
+                       trControl = control_rf,
+                       metric = 'RMSE', 
+                       tuneGrid = tunegrid_rf)
+  
+  Grilla_1 <- ggplot(modelo_rf$results, 
+                     aes(x = min.node.size, y = RMSE, 
+                     color = as.factor(mtry))) +
+                     geom_line() +
+                     geom_point() +
+                     labs(title = "Resultados del grid search",
+                     x = "Mínima cantidad de observaciones por hoja",
+                     y = "RMSE (Cross-Validation)") +
+                     scale_color_discrete("Número de predictores seleccionados al azar") +
+                     theme_bw() +
+                     theme(legend.position = "bottom")
+      
+  Grilla_1
+  
+  test_3$y_hat9 <- predict(modelo_rf, newdata = test_3)
+  MAE_model9 <- with(test_3, mean(abs(price - y_hat9))) #Calculating the MSE
+  MAE_model9
+  
