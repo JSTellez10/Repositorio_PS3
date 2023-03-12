@@ -12,11 +12,15 @@
 #
 #------------------------------------------------------------------------------#
 
+<<<<<<< HEAD
 #Importante para ejecutar el código----
 
   #Para ejecutar el código es necesario descargar todas las carpetas que se encuentran en el siguiente repositorio:
   #https://github.com/AndresMPL/Repositorio_PS3/tree/main/datasets/localidades
   #Guardar estas carpetas en una carpeta llamada "datos" y fijar el directorio de trabajo en esta última carpeta contenedora
+=======
+  rm(list=ls())
+>>>>>>> 20cfe1f6c072d32ac881a337b72122ba4e5fbb37
 
   library(pacman) 
   
@@ -30,7 +34,7 @@
   p_load(tidyverse, rio, sf, dplyr, osmdata, leaflet, scales, stargazer,rstudioapi, 
          rio, plotly, modeldata, rgeos, tmaptools, IRdisplay, spatialsample, geojsonio)
   
-   rm(list=ls())
+  
 
  
 #Lectura de los datos de Train ----
@@ -186,24 +190,67 @@ leaflet() %>%
 
  filtro <- is.na(train$surface_total) 
  sum(filtro)
- train$surface_total[filtro] <- mean(train$surface_total, na.rm = T)
+ train$surface_total_imp[filtro] <- mean(train$surface_total, na.rm = T)
  
  filtro <- is.na(train$surface_covered) 
  sum(filtro)
- train$surface_covered[filtro] <- mean(train$surface_covered, na.rm = T)
+ train$surface_covered_imp[filtro] <- mean(train$surface_covered, na.rm = T)
  
  filtro <- is.na(train$bedrooms) 
  sum(filtro)
- train$bedrooms[filtro] <- mean(train$bedrooms, na.rm = T)
+ train$bedrooms_imp[filtro] <- mean(train$bedrooms, na.rm = T)
  
  filtro <- is.na(train$bathrooms) 
  sum(filtro)
- train$bathrooms[filtro] <- mean(train$bathrooms, na.rm = T)
+ train$bathrooms_imp[filtro] <- mean(train$bathrooms, na.rm = T)
  
  filtro <- is.na(train$rooms)
  sum(filtro)
- train$rooms[filtro] <- mean(train$rooms, na.rm = T)
+ train$rooms_imp[filtro] <- mean(train$rooms, na.rm = T)
 
+##############################################################################
+
+ 
+ filtro <- is.na(train$surface_total) 
+ train$surface_total[filtro] <- mean(train$surface_total, na.rm = T)
+ 
+ filtro <- is.na(train$surface_covered) 
+ train$surface_covered[filtro] <- mean(train$surface_covered, na.rm = T)
+ 
+ filtro <- is.na(train$bedrooms) 
+ train$bedrooms[filtro] <- mean(train$bedrooms, na.rm = T)
+ 
+ filtro <- is.na(train$bathrooms) 
+ train$bathrooms[filtro] <- mean(train$bathrooms, na.rm = T)
+ 
+ filtro <- is.na(train$rooms)
+ train$rooms[filtro] <- mean(train$rooms, na.rm = T)
+ #-----------------------------------------------------------------------------
+ 
+ filtro <- is.na(train$surface_total_imp) 
+ train$surface_total_imp[filtro] <- mean(train$surface_total_imp, na.rm = T)
+ 
+ filtro <- is.na(train$surface_covered_imp) 
+ train$surface_covered_imp[filtro] <- mean(train$surface_covered_imp, na.rm = T)
+ 
+ filtro <- is.na(train$bedrooms_imp) 
+ train$bedrooms_imp[filtro] <- mean(train$bedrooms_imp, na.rm = T)
+ 
+ filtro <- is.na(train$bathrooms_imp) 
+ train$bathrooms_imp[filtro] <- mean(train$bathrooms_imp, na.rm = T)
+ 
+ filtro <- is.na(train$rooms_imp)
+ train$rooms_imp[filtro] <- mean(train$rooms_imp, na.rm = T)
+ 
+ filtro <- is.na(train$mts2) 
+ train$mts2[filtro] <- mean(train$mts2, na.rm = T)
+ 
+ filtro <- is.na(train$parqueadero)
+ train$parqueadero[filtro] <- mean(train$parqueadero, na.rm = T)
+ 
+ 
+############################################################################## 
+ 
  filtro <- is.na(train$lat) | is.na(train$lon) #| is.na(train$rooms) | is.na(train$bathrooms) #| is.na(train$surface_total) | is.na(train$surface_covered) 
  train <- train[!filtro, ] #Filtramos los registros sin lat y lon
  
@@ -279,5 +326,4 @@ leaflet() %>%
  
  price_histogram
  
-   
    
