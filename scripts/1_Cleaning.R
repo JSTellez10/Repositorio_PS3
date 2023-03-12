@@ -43,6 +43,8 @@
 
 #Primer análisis de la BD----
  
+ est_prev <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms) %>% as.data.frame()
+ stargazer(round(est_prev), digits = 4, title="Tabla de Estadísticas descriptivas", type='text')
  sapply(train, function(x) sum(is.na(x))) %>% as.data.frame()  #Revisamos los NA de las variables
  
  #Vamos a sacar los metros cuadrados a partir de la descripción de las propiedades
@@ -103,8 +105,19 @@
  train2$parqueadero <- as.integer(as.logical(train2$parqueadero))
  
  train_area <- train2 %>% select(property_id, mts2, parqueadero)
- train <- left_join(train, train_area, by = "property_id")
  
+ #train <- seguridad
+ 
+ train_area <- train_area[unique(train_area$property_id), ]
+ 
+ train <- left_join(train, train_area)
+ 
+ #Verificamos que los datos no hayan cambiado
+     est_prev <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms) %>% as.data.frame()
+     stargazer(round(est_prev), digits = 4, title="Tabla de Estadísticas descriptivas", type='text')
+     sapply(train, function(x) sum(is.na(x))) %>% as.data.frame()  #Revisamos los NA de las variables
+
+
 #Limpiamos la BD----
  
  train <- train %>% mutate(latp=lat,longp=lon, ln_price = log(price))
@@ -139,9 +152,9 @@
           addCircleMarkers(radius = 1, lng = train$lon, lat = train$lat, weight = 3, color = pal(train$price), fill = pal(train$price)) %>%
           setView(lng = centroide_bta$x, lat = centroide_bta$y, zoom = 11) %>% 
           addLegend("bottomright", pal = pal, values = train$price,
-             title = "Precios",
-             labFormat = labelFormat(prefix = "$"),
-             opacity = 1)
+                   title = "Precios",
+                   labFormat = labelFormat(prefix = "$"),
+                   opacity = 1)
    
  map1
  
@@ -212,6 +225,11 @@
  
  
 #Tabla de Estadísticas Descriptivas - Después de limpieza
+ 
+ summary(train$price) %>%
+   as.matrix() %>%
+   as.data.frame() %>%
+   mutate(V1 = scales::dollar(V1))
  
  estadisticas <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms) %>% as.data.frame()
  estadisticas <- estadisticas %>% select(-geometry) %>% as.data.frame()
