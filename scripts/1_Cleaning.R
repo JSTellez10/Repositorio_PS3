@@ -40,6 +40,72 @@
  
  glimpse(test) 
  glimpse(train) #Las dos BD de Train y Test tienen las mismas variables
+
+#Primer análisis de la BD----
+ 
+ sapply(train, function(x) sum(is.na(x))) %>% as.data.frame()  #Revisamos los NA de las variables
+ 
+ #Vamos a sacar los metros cuadrados a partir de la descripción de las propiedades
+ p_load(tm, tidytext) 
+ 
+ id<-train$property_id
+ descripcion <- train$description
+ titulo <- train$title
+ 
+ df<-data.frame(id,descripcion,titulo)
+ 
+ #Ponemos todo en minúscula, quitamos espacios en blanco sobrante y signos de puntuación
+ 
+ train$descripcion <- removePunctuation(train$description)
+ train$descripcion <- tolower(train$description)
+ train$descripcion <- stripWhitespace(train$description)
+ 
+ #Generamos bigramas
+ 
+ bigrams <- train %>% ungroup() %>%
+            unnest_tokens(bigram, descripcion, token = "ngrams", n = 2)
+ 
+ head(bigrams)
+ 
+ #Eliminamos los bigramas que no contengan información de metros cuadrados
+ 
+ descripcion_keep <- c("mts2", "m", "mts", "metros", "m2", "mt2")
+ bigrams_keep <- data.frame(word2 = descripcion_keep)
+ 
+ bigrams2 <- bigrams %>% ungroup() %>%
+             separate(bigram, c("word1", "word2"), sep = " ") %>%
+             semi_join(bigrams_keep, by = "word2") %>%
+             unite(bigram, word1, sep = " ")
+ 
+ head(bigrams2)
+ 
+ #Se borra la plabra relacionada a metros cuadrados
+ 
+ train2 <- bigrams2 %>% select(-c("word2"))
+ colnames(train2)
+ 
+ train2 <- transform(train2,bigram = as.numeric(bigram))
+ 
+ sapply(train2, function(x) sum(is.na(x))) %>% as.data.frame()  #Revisamos los NA de las variables
+ 
+ filtro <- is.na(train2$bigram) #Transformamos los NA a ceros
+ sum(filtro)
+ train2$bigram[filtro] <- 0
+ 
+ train2 <- train2 %>% rename(mts2=bigram)
+ 
+ #Buscamos informacion sobre si las propiedades tienen parqueaderos / garajes o no a partir de la descripción
+ 
+ library(tokenizers)
+ train2$parqueadero <- tokenize_words(train2$description)
+ descripcion_keep2 <- c("parqueadero?", "garaje?")
+ train2$parqueadero <- as.logical(grepl(paste(descripcion_keep2, collapse = "|"), train2$parqueadero))
+ train2$parqueadero <- as.integer(as.logical(train2$parqueadero))
+ 
+ train_area <- train2 %>% select(property_id, mts2, parqueadero)
+ train <- left_join(train, train_area, by = "property_id")
+ 
+#Limpiamos la BD----
  
  train <- train %>% mutate(latp=lat,longp=lon, ln_price = log(price))
  train <- sf::st_as_sf(train,coords=c('longp','latp'),crs = 4686)
@@ -189,69 +255,5 @@
  
  price_histogram
  
-
- ###############################################################################
- 
- #Vamos a sacar los metros cuadrados a partir de la descripción de las propiedades
- p_load(tm, tidytext) 
- 
- id<-train$property_id
- descripcion <- train$description
- titulo <- train$title
- 
- df<-data.frame(id,descripcion,titulo)
- 
- #Ponemos todo en minúscula, quitamos espacios en blanco sobrante y signos de puntuación
- 
- train$descripcion <- removePunctuation(train$description)
- train$descripcion <- tolower(train$description)
- train$descripcion <- stripWhitespace(train$description)
- 
- # Generamos bigramas
- 
- bigrams <- train %>% ungroup() %>%
-   unnest_tokens(bigram, descripcion, token = "ngrams", n = 2)
- head(bigrams)
- 
- # Eliminamos los bigramas que no contengan información de metros cuadrados
- 
- descripcion_keep <- c("mts2", "m", "mts", "metros", "m2", "mt2")
- bigrams_keep <- data.frame(word2 = descripcion_keep)
- 
- bigrams2 <- bigrams %>% ungroup() %>%
-   separate(bigram, c("word1", "word2"), sep = " ") %>%
-   semi_join(bigrams_keep, by = "word2") %>%
-   unite(bigram, word1, sep = " ")
- 
- head(bigrams2)
- 
- #se borra la plabra relacionada a metros cuadrados
- 
- train2 <- bigrams2 %>% select(-c("word2"))
- colnames(train2)
- 
- 
- train2 <- transform(train2,bigram = as.numeric(bigram))
- 
- sapply(train2, function(x) sum(is.na(x))) %>% as.data.frame()  #Revisamos los NA de las variables
- 
- filtro <- is.na(train2$bigram) #Transformamos los NA a ceros
- sum(filtro)
- train2$bigram[filtro] <- 0
- 
- train2 <- train2 %>% 
-   rename(mts2=bigram)
-   
-   # Buscamos informacion sobre si las propiedades tienen parqueaderos / garajes o no a partir de la descripción
-   
-   library(tokenizers)
-   train2$parqueadero <- tokenize_words(train2$description)
-   descripcion_keep2 <- c("parqueadero?", "garaje?")
-   train2$parqueadero <- as.logical(grepl(paste(descripcion_keep2, collapse = "|"), train2$parqueadero))
-   train2$parqueadero <- as.integer(as.logical(train2$parqueadero))
-   
-   train_area <- train2 %>% select(property_id, mts2, parqueadero) %>% as.data.frame
-   train_area <- train2 %>% select(-geometry) %>% as.data.frame
-   train <- st_join(train, train_area)
    
    
