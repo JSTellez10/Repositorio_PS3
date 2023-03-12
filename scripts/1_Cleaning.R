@@ -106,11 +106,9 @@
  
  train_area <- train2 %>% select(property_id, mts2, parqueadero)
  
- #train <- seguridad
+ train_area2 <- train_area %>% group_by(property_id) %>% slice(1)
  
- train_area <- train_area[unique(train_area$property_id), ]
- 
- train <- left_join(train, train_area)
+ train <- left_join(train, train_area2)
  
  #Verificamos que los datos no hayan cambiado
      est_prev <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms) %>% as.data.frame()
@@ -163,23 +161,29 @@
  
  color <- rep(NA,nrow(train))
  color[train$property_type == "Casa"] <- "#FFB900"
-   color[train$property_type == "Apartamento"] <- "#19AF00"
+ color[train$property_type == "Apartamento"] <- "#19AF00"
    
-   leaflet() %>%
-     addProviderTiles(providers$Stamen.Toner) %>%
-     addPolygons(data=localidades, opacity = 0.5, fill = FALSE, color ="#003CFF", weight = 2.5) %>% 
-     addCircles(lng = train$lon, lat = train$lat, col = color, weight = 2) %>% 
-     setView(lng = centroide_bta$x, lat = centroide_bta$y, zoom = 11) %>% 
-     addLegend("bottomright", labels = c("Apartamentos","Casas"), colors = c("#19AF00","#FFB900"),
-               title = "Tipos de inmuebles",
-               opacity = 1) 
+leaflet() %>%
+          addProviderTiles(providers$Stamen.Toner) %>%
+          addPolygons(data=localidades, opacity = 0.5, fill = FALSE, color ="#003CFF", weight = 2.5) %>% 
+          addCircles(lng = train$lon, lat = train$lat, col = color, weight = 2) %>% 
+          setView(lng = centroide_bta$x, lat = centroide_bta$y, zoom = 11) %>% 
+          addLegend("bottomright", labels = c("Apartamentos","Casas"), colors = c("#19AF00","#FFB900"),
+          title = "Tipos de inmuebles",
+          opacity = 1) 
 
 #Limpieza de la BD ----
  
  sapply(train, function(x) sum(is.na(x))) %>% as.data.frame()  #Revisamos los NA de las variables
    
-  #Imputamos las variables surface_total, surfaced_covered, bedrooms, bathrooms, rooms
+  #Imputamos las variables surface_total, surfaced_covered, bedrooms, bathrooms, rooms y guardamos las originales por separado
  
+  train$surface_total_imp <- train$surface_total
+  train$surface_covered_imp <- train$surface_covered
+  train$bedrooms_imp <- train$bedrooms
+  train$bathrooms_imp <- train$bathrooms
+  train$rooms_imp <- train$rooms
+
  filtro <- is.na(train$surface_total) 
  sum(filtro)
  train$surface_total[filtro] <- mean(train$surface_total, na.rm = T)
