@@ -106,11 +106,11 @@
  
  train_area <- train2 %>% select(property_id, mts2, parqueadero)
  
- #train <- seguridad
+ seguridad-> train
  
- train_area <- train_area[unique(train_area$property_id), ]
+ train_area2 <- train_area %>% group_by(property_id) %>% slice(1)
  
- train <- left_join(train, train_area)
+ train <- left_join(train, train_area2)
  
  #Verificamos que los datos no hayan cambiado
      est_prev <- train %>% select(price, surface_total, surface_covered, rooms, bedrooms, bathrooms) %>% as.data.frame()
