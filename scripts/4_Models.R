@@ -49,7 +49,7 @@
   reg21 <- lm(price~surface_total+surface_covered+rooms+bedrooms+bathrooms+property_type+area_maxima+
                distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
                distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
-               total_eventos_2022+I(total_eventos_2022^2)+I(distancia_cai^2)+(distancia_colegios^2), data = train_7)
+               total_eventos_2022+I(total_eventos_2022^2)+I(distancia_cai^2)+I(distancia_colegios^2), data = train_7)
   
   stargazer(reg21, type = "text", dep.var.labels = "Precio de venta", digits = 4)
   summary(reg21)
@@ -63,7 +63,7 @@
   reg22 <- lm(price~rooms+bedrooms+bathrooms+property_type+area_maxima+
                 distancia_parque+distancia_museo+distancia_ips+distancia_ese+distancia_colegios+distancia_cai+
                 distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
-                total_eventos_2022+I(total_eventos_2022^2)+I(distancia_cai^2)+(distancia_colegios^2), data = train_7)
+                total_eventos_2022+I(total_eventos_2022^2)+I(distancia_cai^2)+I(distancia_colegios^2), data = train_7)
   
   stargazer(reg22, type = "text", dep.var.labels = "Precio de venta", digits = 4)
   summary(reg22)
@@ -207,7 +207,8 @@
                        distancia_best+distancia_centrof+distancia_cuadrantes+distancia_buses+distancia_tm+
                        total_eventos_2022+I(total_eventos_2022^2)+I(total_eventos_2022^3) + I(distancia_cai^2)+I(distancia_colegios^2)+
                        I(distancia_parque*distancia_buses) + I(total_eventos_2022*distancia_cai) + I(distancia_tm*distancia_buses)+
-                       I(distancia_ips*distancia_ese) + I(distancia_parque^2),
+                       I(distancia_ips*distancia_ese) + I(distancia_parque^2)+mts2surface_total_imp+
+                       surface_covered_imp+bedrooms_imp+bathrooms_improoms_imp,
                        data = train_7, 
                        method = "ranger", 
                        trControl = control_rf,
